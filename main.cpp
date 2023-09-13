@@ -46,6 +46,7 @@ int main(void) {
 	unsigned int vertexShader;
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+	glCompileShader(vertexShader);
 
 	// vertex shader compilation error check
 	int success;
