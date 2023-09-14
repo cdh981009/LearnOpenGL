@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="소스 파일\shaders">
+      <UniqueIdentifier>{e08f9db2-b653-43e4-89a2-51c2c5bb866d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -24,7 +27,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.h">
-      <Filter>소스 파일</Filter>
+      <Filter>헤더 파일</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\shader.fs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
+    <None Include="shaders\shader.vs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
