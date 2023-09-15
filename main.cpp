@@ -84,8 +84,8 @@ int main(void) {
 
         // use our shader program when we want to redner an object
         ourShader.use();
-        float offset = sin(2.0 * glfwGetTime()) / 2.0;
-        ourShader.setFloat("offset", offset);
+        //float offset = sin(2.0 * glfwGetTime()) / 2.0;
+        //ourShader.setFloat("offset", offset);
         //glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
         // bind VAO which indirectly binds VBO and vertex attributes
         glBindVertexArray(VAO);
