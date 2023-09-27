@@ -31,6 +31,10 @@
     <None Include="shaders\shader.fs" />
     <None Include="shaders\shader.vs" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\container.jpg" />
+    <Image Include="resources\wall.jpg" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
