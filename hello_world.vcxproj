@@ -32,6 +32,7 @@
     <None Include="shaders\shader.vs" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="resources\awesomeface.png" />
     <Image Include="resources\container.jpg" />
     <Image Include="resources\wall.jpg" />
   </ItemGroup>
