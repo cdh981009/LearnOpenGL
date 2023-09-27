@@ -9,6 +9,8 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
+float mixValue = 0.2f;
+
 int main(void) {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -78,10 +80,10 @@ int main(void) {
     // rectangle
     float vertices[] = {
         // positions          // colors           // texture coords
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 2.0f,   // top right
+         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
          0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
         -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 2.0f    // top left 
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
     };
     unsigned int indices[] = { // note that we start from 0!
     	0, 1, 3, // first triangle
@@ -134,6 +136,7 @@ int main(void) {
 
         // use our shader program when we want to redner an object
         ourShader.use();
+        ourShader.setFloat("mixValue", mixValue);
 
         // active textures
         glActiveTexture(GL_TEXTURE0);
@@ -163,5 +166,12 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+        mixValue += 0.05;
+    }
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+        mixValue -= 0.05;
     }
 }
