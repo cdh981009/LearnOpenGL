@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include "shader.h"
+#include "stb_image.h"
 
 #include <iostream>
 
@@ -32,17 +33,6 @@ int main(void) {
 
     Shader ourShader("./shaders/shader.vs", "./shaders/shader.fs");
 
-    float vertices[] = {
-        // positions		 // colors
-         0.5f, -0.5f, 0.0f,	 1.0f, 0.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f,	 0.0f, 1.0f, 0.0f, // bottom left
-         0.0f,  0.5f, 0.0f,	 0.0f, 0.0f, 1.0f, // top
-    };
-    //unsigned int indices[] = { // note that we start from 0!
-    //	0, 1, 3, // first triangle
-    //	1, 2, 3, // second triangle
-    //};
-    
     // generate a texture and bound it
     unsigned int texture;
     glGenTextures(1, &texture);
@@ -67,11 +57,22 @@ int main(void) {
     // after generating the texture and mipmaps, free the image memory
     stbi_image_free(data);
     
-    unsigned int VBO;
+    // rectangle
+    float vertices[] = {
+        // positions          // colors           // texture coords
+         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
+    };
+    unsigned int indices[] = { // note that we start from 0!
+    	0, 1, 3, // first triangle
+    	1, 2, 3, // second triangle
+    };
+
+    unsigned int VBO, EBO, VAO;
     glGenBuffers(1, &VBO);
-    /*unsigned int EBO;
-    glGenBuffers(1, &EBO);*/
-    unsigned int VAO;
+    glGenBuffers(1, &EBO);
     glGenVertexArrays(1, &VAO);
 
     // :: Initialization code ::
@@ -81,15 +82,17 @@ int main(void) {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     // 3. copy our indices array in an element buffer for OpenGL to use
-    /*glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);*/
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
     // 4. then set the vertex attributes pointers
     // this tells OpenGL how our vertices array is structured
     // so the vertex shader can work as intended
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -110,9 +113,10 @@ int main(void) {
         ourShader.use();
         //glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
         // bind VAO which indirectly binds VBO and vertex attributes
+        glBindTexture(GL_TEXTURE_2D, texture);
         glBindVertexArray(VAO);
-        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        //glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0); // unbind
 
         // check and call events and swap the buffers
