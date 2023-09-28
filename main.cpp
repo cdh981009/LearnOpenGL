@@ -154,6 +154,15 @@ int main(void) {
         // bind VAO which indirectly binds VBO and vertex attributes
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        // draw second one using another transformation
+        trans = glm::mat4(1.0f);
+        trans = glm::translate(trans, glm::vec3(-0.5, 0.5, 0.0f));
+        trans = glm::scale(trans, (float)sin(glfwGetTime()) * glm::vec3(1.0, 1.0, 1.0));
+
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
         //glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0); // unbind
 
