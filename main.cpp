@@ -165,16 +165,6 @@ int main(void) {
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
 
-    // set model in the render loop below
-    glm::mat4 view = glm::mat4(1.0f);
-    // translate the scene in the reverse direction of where we want to move
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-    glm::mat4 projection;
-    projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-
-    ourShader.setMat4("view", view);
-    ourShader.setMat4("projection", projection);
-
     // render loop
     while (!glfwWindowShouldClose(window)) {
         // input
@@ -192,6 +182,23 @@ int main(void) {
 
         // use our shader program when we want to redner an object
         ourShader.use();
+
+        // set model in the render loop below
+        const float radius = 10.0f;
+        float camX = sin(glfwGetTime()) * radius;
+        float camZ = cos(glfwGetTime()) * radius;
+
+        glm::mat4 view;
+        // translate the scene in the reverse direction of where we want to move
+        view = glm::lookAt(
+            glm::vec3(camX, 0.0f, camZ),  // position
+            glm::vec3(0.0, 0.0f, 0.0f),  // target
+            glm::vec3(0.0, 1.0f, 0.0f)); // up
+        ourShader.setMat4("view", view);
+
+        glm::mat4 projection;
+        projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+        ourShader.setMat4("projection", projection);
 
         // active textures
         glActiveTexture(GL_TEXTURE0);
