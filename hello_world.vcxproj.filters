@@ -35,6 +35,9 @@
     <ClInclude Include="stb_image.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\shader.fs">
@@ -43,5 +46,16 @@
     <None Include="shaders\shader.vs">
       <Filter>소스 파일\shaders</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\awesomeface.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="resources\container.jpg">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="resources\wall.jpg">
+      <Filter>리소스 파일</Filter>
+    </Image>
   </ItemGroup>
 </Project>
