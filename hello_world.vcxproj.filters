@@ -40,10 +40,16 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\shader.fs">
+    <None Include="shaders\lighting.fs">
       <Filter>소스 파일\shaders</Filter>
     </None>
-    <None Include="shaders\shader.vs">
+    <None Include="shaders\lighting.vs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
+    <None Include="shaders\light_cube.fs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
+    <None Include="shaders\light_cube.vs">
       <Filter>소스 파일\shaders</Filter>
     </None>
   </ItemGroup>

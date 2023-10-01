@@ -29,8 +29,10 @@
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\shader.fs" />
-    <None Include="shaders\shader.vs" />
+    <None Include="shaders\light_cube.fs" />
+    <None Include="shaders\light_cube.vs" />
+    <None Include="shaders\lighting.fs" />
+    <None Include="shaders\lighting.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\awesomeface.png" />
