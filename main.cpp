@@ -21,7 +21,7 @@ float lastFrame = 0.0f;
 float lastX = 400., lastY = 300.;
 bool firstMouse = true;
 
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(0.0f, 1.0f, 3.0f));
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f); // location of the light source
 
 int main(void) {
@@ -63,48 +63,48 @@ int main(void) {
     
     // vertices for a cube
     float vertices[] = {
-    // position           texture
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+    // position           normal vector
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
 
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
     };
 
     unsigned int VBO;
@@ -124,7 +124,8 @@ int main(void) {
     // 3. then set the vertex attributes pointers
     // this tells OpenGL how our vertices array is structured
     // so that the vertex shader can use the attributes
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    // position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     // glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     // glEnableVertexAttribArray(1);
@@ -135,8 +136,12 @@ int main(void) {
     // VBO already contains the data, we only need to bind to the VBO
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     // set the vertex attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    // position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    // normal vector
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -164,6 +169,8 @@ int main(void) {
         lightingShader.setMat4("view", camera.GetViewMatrix());
         lightingShader.setMat4("projection", projection);
         lightingShader.setMat4("model", glm::mat4(1.0));
+
+        lightingShader.setVec3("lightPos", lightPos);
 
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
