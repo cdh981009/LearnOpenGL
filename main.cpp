@@ -163,7 +163,6 @@ int main(void) {
         // draw objects under lighting
         // ---------------------------
         lightingShader.use();
-        lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
         
         lightingShader.setMat4("view", camera.GetViewMatrix());
         lightingShader.setMat4("projection", projection);
@@ -176,6 +175,10 @@ int main(void) {
         lightingShader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
         lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
         lightingShader.setFloat("material.shininess", 32.0f);
+
+        lightingShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+        lightingShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f); // darken diffuse light a bit
+        lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
