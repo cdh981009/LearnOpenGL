@@ -163,7 +163,6 @@ int main(void) {
         // draw objects under lighting
         // ---------------------------
         lightingShader.use();
-        lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
         lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
         
         lightingShader.setMat4("view", camera.GetViewMatrix());
@@ -172,6 +171,11 @@ int main(void) {
 
         lightingShader.setVec3("lightPos", lightPos);
         lightingShader.setVec3("viewPos", camera.Position);
+
+        lightingShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+        lightingShader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+        lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+        lightingShader.setFloat("material.shininess", 32.0f);
 
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -182,6 +186,10 @@ int main(void) {
 
         lightCubeShader.setMat4("view", camera.GetViewMatrix());
         lightCubeShader.setMat4("projection", projection);
+
+        lightPos.x = cos(glfwGetTime()) * 1.2f;
+        lightPos.z = sin(glfwGetTime()) * 2.0f;
+
         model = glm::mat4(1.0);
         model = glm::translate(model, lightPos);
         model = glm::scale(model, glm::vec3(0.2f));
