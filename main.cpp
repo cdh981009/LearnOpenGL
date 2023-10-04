@@ -171,6 +171,7 @@ int main(void) {
         lightingShader.setMat4("model", glm::mat4(1.0));
 
         lightingShader.setVec3("lightPos", lightPos);
+        lightingShader.setVec3("viewPos", camera.Position);
 
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
