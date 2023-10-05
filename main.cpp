@@ -72,10 +72,22 @@ int main(void) {
     } else {
         std::cout << "Failed to load texture" << std::endl;
     }
-
-    // after generating the texture and mipmaps, free the image memory
     stbi_image_free(data);
 
+    unsigned int specularMap;
+    glGenTextures(1, &specularMap);
+    glBindTexture(GL_TEXTURE_2D, specularMap);
+
+    data = stbi_load("./resources/container2_specular.png", &width, &height, &nrChannels, 0);
+    if (data) {
+        // generate a texture using the previously loaded image data
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    } else {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+    
     // shader loading
     Shader lightingShader("./shaders/lighting.vs", "./shaders/lighting.fs");
     Shader lightCubeShader("./shaders/light_cube.vs", "./shaders/light_cube.fs");
@@ -167,6 +179,11 @@ int main(void) {
 
     lightingShader.use();
     lightingShader.setInt("material.diffuse", 0);
+    lightingShader.setInt("material.specular", 1);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, diffuseMap);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, specularMap);
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -196,7 +213,6 @@ int main(void) {
         lightingShader.setVec3("lightPos", lightPos);
         lightingShader.setVec3("viewPos", camera.Position);
 
-        lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
         lightingShader.setFloat("material.shininess", 32.0f);
 
         glm::vec3 lightColor = glm::vec3(1.0f);
@@ -204,14 +220,13 @@ int main(void) {
         //lightColor.y = sin(glfwGetTime() * 0.7f);
         //lightColor.z = sin(glfwGetTime() * 1.3f);
 
-        glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
+        glm::vec3 diffuseColor = lightColor * glm::vec3(0.7f);
         glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
 
         lightingShader.setVec3("light.ambient", ambientColor);
         lightingShader.setVec3("light.diffuse", diffuseColor); // darken diffuse light a bit
         lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
-        glBindTexture(GL_TEXTURE_2D, diffuseMap);
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
