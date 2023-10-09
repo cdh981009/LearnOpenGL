@@ -138,6 +138,19 @@ int main(void) {
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
     };
 
+    glm::vec3 cubePositions[] = {
+        glm::vec3(0.0f,  0.0f,  0.0f),
+        glm::vec3(2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3(2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3(1.3f, -2.0f, -2.5f),
+        glm::vec3(1.5f,  2.0f, -2.5f),
+        glm::vec3(1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+
     unsigned int VBO;
     glGenBuffers(1, &VBO);
 
@@ -210,7 +223,7 @@ int main(void) {
         lightingShader.setMat4("projection", projection);
         lightingShader.setMat4("model", glm::mat4(1.0));
 
-        lightingShader.setVec3("lightPos", lightPos);
+        //lightingShader.setVec3("light.position", lightPos);
         lightingShader.setVec3("viewPos", camera.Position);
 
         lightingShader.setFloat("material.shininess", 32.0f);
@@ -227,8 +240,20 @@ int main(void) {
         lightingShader.setVec3("light.diffuse", diffuseColor); // darken diffuse light a bit
         lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
+        lightingShader.setVec3("light.direction", -0.2f, -1.0f, -0.3f);
+
         glBindVertexArray(lightVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        for (unsigned int i = 0; i < 10; i++) {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            lightingShader.setMat4("model", model);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+        //glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // draw the light source
         // ---------------------
@@ -237,8 +262,8 @@ int main(void) {
         lightCubeShader.setMat4("view", camera.GetViewMatrix());
         lightCubeShader.setMat4("projection", projection);
 
-        lightPos.x = cos(glfwGetTime()) * 1.2f;
-        lightPos.z = sin(glfwGetTime()) * 2.0f;
+        //lightPos.x = cos(glfwGetTime()) * 1.2f;
+        //lightPos.z = sin(glfwGetTime()) * 2.0f;
 
         model = glm::mat4(1.0);
         model = glm::translate(model, lightPos);
@@ -246,7 +271,7 @@ int main(void) {
         lightCubeShader.setMat4("model", model);
 
         glBindVertexArray(lightCubeVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        //glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // unbind
         glBindVertexArray(0);
