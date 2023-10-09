@@ -239,6 +239,10 @@ int main(void) {
         lightingShader.setVec3("light.diffuse", diffuseColor); // darken diffuse light a bit
         lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
+        lightingShader.setFloat("light.constant",  1.0f);
+        lightingShader.setFloat("light.linear",    0.09f);
+        lightingShader.setFloat("light.quadratic", 0.032f);
+
         // directional light
         //lightingShader.setVec4("light.direction", -0.2f, -1.0f, -0.3f, 0.0f);
         // point light
