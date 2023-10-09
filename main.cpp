@@ -223,7 +223,6 @@ int main(void) {
         lightingShader.setMat4("projection", projection);
         lightingShader.setMat4("model", glm::mat4(1.0));
 
-        //lightingShader.setVec3("light.position", lightPos);
         lightingShader.setVec3("viewPos", camera.Position);
 
         lightingShader.setFloat("material.shininess", 32.0f);
@@ -240,7 +239,10 @@ int main(void) {
         lightingShader.setVec3("light.diffuse", diffuseColor); // darken diffuse light a bit
         lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
-        lightingShader.setVec3("light.direction", -0.2f, -1.0f, -0.3f);
+        // directional light
+        //lightingShader.setVec4("light.direction", -0.2f, -1.0f, -0.3f, 0.0f);
+        // point light
+        lightingShader.setVec4("light.lightVector", glm::vec4(lightPos, 1.0f));
 
         glBindVertexArray(lightVAO);
 
@@ -271,7 +273,7 @@ int main(void) {
         lightCubeShader.setMat4("model", model);
 
         glBindVertexArray(lightCubeVAO);
-        //glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // unbind
         glBindVertexArray(0);
