@@ -243,10 +243,14 @@ int main(void) {
         lightingShader.setFloat("light.linear",    0.09f);
         lightingShader.setFloat("light.quadratic", 0.032f);
 
-        // directional light
-        //lightingShader.setVec4("light.direction", -0.2f, -1.0f, -0.3f, 0.0f);
-        // point light
-        lightingShader.setVec4("light.lightVector", glm::vec4(lightPos, 1.0f));
+        // 1. directional light
+        //lightingShader.setVec4("light.lightVector", -0.2f, -1.0f, -0.3f, 0.0f);
+        // 2. point light
+        //lightingShader.setVec4("light.lightVector", glm::vec4(lightPos, 1.0f));
+        // 3. spotlight
+        lightingShader.setVec4("light.lightVector", glm::vec4(camera.Position, 1.0));
+        lightingShader.setVec3("light.direction", camera.Front);
+        lightingShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
 
         glBindVertexArray(lightVAO);
 
