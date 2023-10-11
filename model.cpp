@@ -9,6 +9,8 @@ using std::cout;
 using std::endl;
 using std::vector;
 
+unsigned int TextureFromFile(const char* path, string& directory);
+
 void Model::Draw(Shader& shader) {
 	for (unsigned int i = 0; i < meshes.size(); i++) {
 		meshes[i].Draw(shader);
@@ -104,13 +106,14 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
 		texture.id = TextureFromFile(str.C_Str(), directory);
 		texture.type = typeName;
 		texture.path = str.C_Str();
-		textures.push_back(std::move(texture));
+		textures.push_back(texture);
 		texturesLoaded.push_back(texture); // add to loaded textures
 	}
 	return textures;
 }
 
 unsigned int TextureFromFile(const char* path, string& directory) {
+	cout << "reading" << endl;
 	string filename = string(path);
 	filename = directory + '/' + filename;
 
