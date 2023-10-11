@@ -285,10 +285,9 @@ int main(void) {
         lightCubeShader.setMat4("view", camera.GetViewMatrix());
         lightCubeShader.setMat4("projection", projection);
 
-        //lightPos.x = cos(glfwGetTime()) * 1.2f;
-        //lightPos.z = sin(glfwGetTime()) * 2.0f;
-
-        glBindVertexArray(lightCubeVAO);
+        auto& lightPos = pointLightPositions[0];
+        lightPos.x = cos(glfwGetTime()) * 4.0f;
+        lightPos.z = sin(glfwGetTime()) * 4.0f;
 
         for (int i = 0; i < 4; i++) {
             model = glm::mat4(1.0f);
@@ -296,6 +295,7 @@ int main(void) {
             model = glm::scale(model, glm::vec3(0.2f));
             lightCubeShader.setMat4("model", model);
 
+            glBindVertexArray(lightCubeVAO);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
