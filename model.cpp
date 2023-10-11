@@ -113,7 +113,6 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
 }
 
 unsigned int TextureFromFile(const char* path, string& directory) {
-	cout << "reading" << endl;
 	string filename = string(path);
 	filename = directory + '/' + filename;
 
