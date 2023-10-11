@@ -90,11 +90,22 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
 		aiString str;
 		mat->GetTexture(type, i, &str);
+		bool skip = false;
+		for (const auto& textureLoaded : texturesLoaded) {
+			if (std::strcmp(textureLoaded.path.data(), str.C_Str()) == 0) {
+				textures.push_back(textureLoaded);
+				skip = true;
+				break;
+			}
+		}
+		if (skip) continue;
+
 		Texture texture;
 		texture.id = TextureFromFile(str.C_Str(), directory);
 		texture.type = typeName;
 		texture.path = str.C_Str();
 		textures.push_back(std::move(texture));
+		texturesLoaded.push_back(texture); // add to loaded textures
 	}
 	return textures;
 }
