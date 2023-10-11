@@ -7,6 +7,7 @@
 #include "shader.h"
 #include "stb_image.h"
 #include "camera.h"
+#include "model.h"
 
 #include <iostream>
 
@@ -63,6 +64,8 @@ int main(void) {
 
     // enable z buffer
     glEnable(GL_DEPTH_TEST);
+
+    stbi_set_flip_vertically_on_load(true);
 
     // texture loading
     unsigned int diffuseMap;
@@ -204,6 +207,8 @@ int main(void) {
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, specularMap);
 
+    Model ourModel("./resources/backpack/backpack.obj");
+
     // render loop
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = glfwGetTime();
@@ -218,7 +223,7 @@ int main(void) {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glm::mat4 projection, model;
+        glm::mat4 projection;
         projection = glm::perspective(glm::radians(camera.Zoom), 800.0f / 600.0f, 0.1f, 100.0f);
 
         // draw objects under lighting
@@ -227,7 +232,6 @@ int main(void) {
         
         lightingShader.setMat4("view", camera.GetViewMatrix());
         lightingShader.setMat4("projection", projection);
-        lightingShader.setMat4("model", glm::mat4(1.0));
 
         lightingShader.setVec3("viewPos", camera.Position);
 
@@ -264,19 +268,15 @@ int main(void) {
         lightingShader.setVec3("light.direction", camera.Front);
         lightingShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
         lightingShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));*/
+   
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        float angle = 20.0f;
+        model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+        lightingShader.setMat4("model", model);
 
-        glBindVertexArray(lightVAO);
-
-        for (unsigned int i = 0; i < 10; i++) {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            lightingShader.setMat4("model", model);
-
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-        //glDrawArrays(GL_TRIANGLES, 0, 36);
+        ourModel.Draw(lightingShader);
+        
 
         // draw the light source
         // ---------------------
@@ -298,7 +298,6 @@ int main(void) {
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
-
 
         // unbind
         glBindVertexArray(0);
