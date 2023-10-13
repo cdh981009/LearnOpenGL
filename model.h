@@ -11,6 +11,8 @@
 #include <vector>
 #include <string>
 
+unsigned int TextureFromFile(const char* path, const std::string& directory);
+
 class Model {
 public:
 	Model(const char* path) {
