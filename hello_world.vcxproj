@@ -39,6 +39,7 @@
     <None Include="shaders\light_cube.vs" />
     <None Include="shaders\lighting.fs" />
     <None Include="shaders\lighting.vs" />
+    <None Include="shaders\single_color.fs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\awesomeface.png" />

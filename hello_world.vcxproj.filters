@@ -70,6 +70,9 @@
     <None Include="shaders\depth_testing.vs">
       <Filter>소스 파일\shaders</Filter>
     </None>
+    <None Include="shaders\single_color.fs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\awesomeface.png">
