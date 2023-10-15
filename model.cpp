@@ -110,7 +110,7 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
 	return textures;
 }
 
-unsigned int TextureFromFile(const char* path, const string& directory) {
+unsigned int TextureFromFile(const char* path, const string& directory, bool clamp) {
 	string filename = string(path);
 	filename = directory + '/' + filename;
 
@@ -132,9 +132,10 @@ unsigned int TextureFromFile(const char* path, const string& directory) {
 		glBindTexture(GL_TEXTURE_2D, id);
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		
+		GLint param = clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, param);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, param);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	} else {
