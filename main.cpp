@@ -12,6 +12,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <numeric>
 
 using std::vector;
 
@@ -66,6 +68,8 @@ int main(void) {
     // enable z buffer
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_STENCIL_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     stbi_set_flip_vertically_on_load(true);
 
@@ -73,16 +77,17 @@ int main(void) {
     unsigned int cubeTexture = TextureFromFile("marble.jpg", "./resources");
     unsigned int floorTexture = TextureFromFile("metal.png", "./resources");
     unsigned int grassTexture = TextureFromFile("grass.png", "./resources", true);
+    unsigned int windowTexture = TextureFromFile("blending_transparent_window.png", "./resources", true);
     
     // shader loading
     Shader shader("./shaders/depth_testing.vs", "./shaders/depth_testing.fs");
     
-    vector<glm::vec3> vegetation;
-    vegetation.push_back(glm::vec3(-1.5f, 0.0f, -0.48f));
-    vegetation.push_back(glm::vec3(1.5f, 0.0f, 0.51f));
-    vegetation.push_back(glm::vec3(0.0f, 0.0f, 0.7f));
-    vegetation.push_back(glm::vec3(-0.3f, 0.0f, -2.3f));
-    vegetation.push_back(glm::vec3(0.5f, 0.0f, -0.6f));
+    vector<glm::vec3> windowPos;
+    windowPos.push_back(glm::vec3(-1.5f, 0.0f, -0.48f));
+    windowPos.push_back(glm::vec3(1.5f, 0.0f, 0.51f));
+    windowPos.push_back(glm::vec3(0.0f, 0.0f, 0.7f));
+    windowPos.push_back(glm::vec3(-0.3f, 0.0f, -2.3f));
+    windowPos.push_back(glm::vec3(0.5f, 0.0f, -0.6f));
 
     // vertices for a cube
     float cubeVertices[] = {
@@ -139,7 +144,7 @@ int main(void) {
         -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
          5.0f, -0.5f, -5.0f,  2.0f, 2.0f
     };
-    float grassVertices[] = {
+    float windowVertices[] = {
         // positions         // texture Coords
         -0.5f, -0.5f, 0.0f,  0.0f, 0.0f,
          0.5f, -0.5f, 0.0f,  1.0f, 0.0f,
@@ -175,13 +180,13 @@ int main(void) {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glBindVertexArray(0);
 
-    // grass VAO
-    unsigned int vegetationVAO, vegetationVBO;
-    glGenVertexArrays(1, &vegetationVAO);
-    glGenBuffers(1, &vegetationVBO);
-    glBindVertexArray(vegetationVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, vegetationVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(grassVertices), &grassVertices, GL_STATIC_DRAW);
+    // window VAO
+    unsigned int windowVAO, windowVBO;
+    glGenVertexArrays(1, &windowVAO);
+    glGenBuffers(1, &windowVBO);
+    glBindVertexArray(windowVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, windowVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(windowVertices), &windowVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(1);
@@ -231,11 +236,17 @@ int main(void) {
         shader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);;
 
-        glBindVertexArray(vegetationVAO);
-        glBindTexture(GL_TEXTURE_2D, grassTexture);
-        for (unsigned int i = 0; i < vegetation.size(); i++) {
+        glBindVertexArray(windowVAO);
+        glBindTexture(GL_TEXTURE_2D, windowTexture);
+        vector<unsigned int> windowSorted(windowPos.size());
+        std::iota(windowSorted.begin(), windowSorted.end(), 0);
+        std::sort(windowSorted.begin(), windowSorted.end(),
+            [&windowPos](unsigned int l, unsigned int r) -> bool {
+            return glm::length(camera.Position - windowPos[l]) > glm::length(camera.Position - windowPos[r]);
+        });
+        for (unsigned int i : windowSorted) {
             model = glm::mat4(1.0f);
-            model = glm::translate(model, vegetation[i]);
+            model = glm::translate(model, windowPos[i]);
             shader.setMat4("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 6);
         }
