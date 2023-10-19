@@ -76,11 +76,6 @@ int main(void) {
     stbi_set_flip_vertically_on_load(true);
 
     // texture loading
-    unsigned int cubeTexture = TextureFromFile("marble.jpg", "./resources");
-    unsigned int floorTexture = TextureFromFile("metal.png", "./resources");
-    unsigned int grassTexture = TextureFromFile("grass.png", "./resources", true);
-    unsigned int windowTexture = TextureFromFile("blending_transparent_window.png", "./resources", true);
-
     vector<std::string> faces{
         "right.jpg",
         "left.jpg",
@@ -89,10 +84,16 @@ int main(void) {
         "front.jpg",
         "back.jpg",
     };
-    unsigned int cubmapTexture = loadCubemap(faces, "./resources/skybox");
+    unsigned int cubemapTexture = loadCubemap(faces, "./resources/skybox/");
 
+    unsigned int cubeTexture = TextureFromFile("marble.jpg", "./resources");
+    unsigned int floorTexture = TextureFromFile("metal.png", "./resources");
+    unsigned int grassTexture = TextureFromFile("grass.png", "./resources", true);
+    unsigned int windowTexture = TextureFromFile("blending_transparent_window.png", "./resources", true);
+    
     // shader loading
     Shader shader("./shaders/depth_testing.vs", "./shaders/depth_testing.fs");
+    Shader skyboxShader("./shaders/skybox.vs", "./shaders/skybox.fs");
     
     vector<glm::vec3> windowPos;
     windowPos.push_back(glm::vec3(-1.5f, 0.0f, -0.48f));
@@ -249,8 +250,21 @@ int main(void) {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glBindVertexArray(0);
 
+    // skybox VAO
+    unsigned int skyboxVAO, skyboxVBO;
+    glGenVertexArrays(1, &skyboxVAO);
+    glGenBuffers(1, &skyboxVBO);
+    glBindVertexArray(skyboxVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glBindVertexArray(0);
+
     shader.use();
     shader.setInt("texture1", 0);
+    skyboxShader.use();
+    skyboxShader.setInt("skybox", 0);
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -266,11 +280,23 @@ int main(void) {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-        shader.use();
-
-        glm::mat4 view = camera.GetViewMatrix();
+        glm::mat4 view;
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        glm::mat4 model = glm::mat4(1.0f); 
+        glm::mat4 model = glm::mat4(1.0f);
+
+        glDepthMask(GL_FALSE);
+        skyboxShader.use();
+        view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
+        skyboxShader.setMat4("view", view);
+        skyboxShader.setMat4("projection", projection);
+        glBindVertexArray(skyboxVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDepthMask(GL_TRUE);
+
+        shader.use();
+        view = camera.GetViewMatrix();
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
 

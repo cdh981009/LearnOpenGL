@@ -40,6 +40,8 @@
     <None Include="shaders\lighting.fs" />
     <None Include="shaders\lighting.vs" />
     <None Include="shaders\single_color.fs" />
+    <None Include="shaders\skybox.fs" />
+    <None Include="shaders\skybox.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\awesomeface.png" />
