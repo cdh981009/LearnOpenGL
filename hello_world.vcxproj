@@ -35,6 +35,8 @@
   <ItemGroup>
     <None Include="shaders\depth_testing.fs" />
     <None Include="shaders\depth_testing.vs" />
+    <None Include="shaders\geometry_shader.fs" />
+    <None Include="shaders\geometry_shader.vs" />
     <None Include="shaders\light_cube.fs" />
     <None Include="shaders\light_cube.vs" />
     <None Include="shaders\lighting.fs" />
