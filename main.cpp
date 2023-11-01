@@ -78,7 +78,9 @@ int main(void) {
     // unsigned int cubeTexture = TextureFromFile("marble.jpg", "./resources");
 
     // shader loading
-    Shader shader("./shaders/geometry_shader.vs", "./shaders/geometry_shader.fs");
+    Shader shader("./shaders/geometry_shader.vs",
+                  "./shaders/geometry_shader.fs",
+                  "./shaders/geometry_shader.gs");
 
     float points[] = {
         -0.5f,  0.5f, // top-left
