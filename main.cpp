@@ -81,8 +81,11 @@ int main(void) {
 
     // shader loading
     Shader shader("./shaders/geometry_shader.vs",
-                  "./shaders/geometry_shader.fs",
-                  "./shaders/geometry_shader.gs");
+                  "./shaders/geometry_shader.fs");
+
+    Shader normalVisualizerShader("./shaders/normal_visualizer.vs",
+                                  "./shaders/normal_visualizer.fs",
+                                  "./shaders/normal_visualizer.gs");
 
     float points[] = {
         -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // top-left
@@ -127,9 +130,15 @@ int main(void) {
         // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
         shader.setMat4("model", model);
-
-        shader.setFloat("time", glfwGetTime());
         ourModel.Draw(shader);
+
+
+        normalVisualizerShader.use();
+
+        normalVisualizerShader.setMat4("projection", projection);
+        normalVisualizerShader.setMat4("view", view);
+        normalVisualizerShader.setMat4("model", model);
+        ourModel.Draw(normalVisualizerShader);
 
         // unbind
         glBindVertexArray(0);
