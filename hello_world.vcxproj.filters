@@ -73,6 +73,18 @@
     <None Include="shaders\single_color.fs">
       <Filter>소스 파일\shaders</Filter>
     </None>
+    <None Include="shaders\instancing.fs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
+    <None Include="shaders\instancing.vs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
+    <None Include="shaders\model.vs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
+    <None Include="shaders\model.fs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\awesomeface.png">

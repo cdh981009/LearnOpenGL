@@ -77,14 +77,16 @@ int main(void) {
     Model rock("./resources/rock/rock.obj");
 
     // shader loading
-    Shader shader("./shaders/instancing.vs", "./shaders/instancing.fs");
+    Shader shader("./shaders/model.vs", "./shaders/model.fs");
+    Shader instanceShader("./shaders/instancing.vs", "./shaders/instancing.fs");
 
-    unsigned int amount = 1000;
+    unsigned int amount = 100000;
     glm::mat4* modelMatrices;
     modelMatrices = new glm::mat4[amount];
     srand(glfwGetTime());
-    float radius = 50.0f;
-    float offset = 2.5f;
+    float radius = 100.0f;
+    float offset = 50.0f;
+
     for (unsigned int i = 0; i < amount; i++) {
         glm::mat4 model = glm::mat4(1.0f);
         // 1.translation: displace along circle with 'radius' in range [-offset, offset]
@@ -107,6 +109,33 @@ int main(void) {
 
         // 4. now add to list of matrices
         modelMatrices[i] = model;
+    }
+
+    unsigned int buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, amount * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
+
+    for (unsigned int i = 0; i < rock.meshes.size(); i++) {
+        unsigned int VAO = rock.meshes[i].VAO;
+        glBindVertexArray(VAO);
+        std::size_t vec4Size = sizeof(glm::vec4);
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(1 * vec4Size));
+        glEnableVertexAttribArray(5);
+        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+        glEnableVertexAttribArray(6);
+        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
+        
+        glVertexAttribDivisor(3, 1);
+        glVertexAttribDivisor(4, 1);
+        glVertexAttribDivisor(5, 1);
+        glVertexAttribDivisor(6, 1);
+
+        glBindVertexArray(0);
+    
     }
 
     // render loop
@@ -136,10 +165,13 @@ int main(void) {
         planet.Draw(shader);
 
         // draw meteorites
-        for (unsigned int i = 0; i < amount; i++)
-        {
-            shader.setMat4("model", modelMatrices[i]);
-            rock.Draw(shader);
+        instanceShader.use();
+        instanceShader.setMat4("projection", projection);
+        instanceShader.setMat4("view", view);
+        glBindTexture(GL_TEXTURE_2D, rock.texturesLoaded[0].id);
+        for (unsigned int i = 0; i < rock.meshes.size(); i++) {
+            glBindVertexArray(rock.meshes[i].VAO);
+            glDrawElementsInstanced(GL_TRIANGLES, rock.meshes[i].indices.size(), GL_UNSIGNED_INT, 0, amount);
         }
 
         // unbind
