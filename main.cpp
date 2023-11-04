@@ -41,6 +41,7 @@ int main(void) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 4);
     // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
@@ -70,6 +71,7 @@ int main(void) {
     glEnable(GL_STENCIL_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_MULTISAMPLE);
 
     stbi_set_flip_vertically_on_load(true);
 
@@ -80,7 +82,7 @@ int main(void) {
     Shader shader("./shaders/model.vs", "./shaders/model.fs");
     Shader instanceShader("./shaders/instancing.vs", "./shaders/instancing.fs");
 
-    unsigned int amount = 100000;
+    unsigned int amount = 10000;
     glm::mat4* modelMatrices;
     modelMatrices = new glm::mat4[amount];
     srand(glfwGetTime());
