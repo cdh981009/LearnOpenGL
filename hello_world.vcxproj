@@ -40,6 +40,8 @@
     <None Include="shaders\light_cube.vs" />
     <None Include="shaders\lighting.fs" />
     <None Include="shaders\lighting.vs" />
+    <None Include="shaders\shadow_mapping.fs" />
+    <None Include="shaders\shadow_mapping.vs" />
     <None Include="shaders\single_color.fs" />
   </ItemGroup>
   <ItemGroup>
