@@ -73,11 +73,19 @@
     <None Include="shaders\single_color.fs">
       <Filter>소스 파일\shaders</Filter>
     </None>
-    <None Include="shaders\blinn_phong.fs" />
     <None Include="shaders\shadow_mapping.fs">
       <Filter>소스 파일\shaders</Filter>
     </None>
     <None Include="shaders\shadow_mapping.vs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
+    <None Include="shaders\draw_shadow.fs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
+    <None Include="shaders\draw_shadow.vs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
+    <None Include="shaders\blinn_phong.fs">
       <Filter>소스 파일\shaders</Filter>
     </None>
   </ItemGroup>

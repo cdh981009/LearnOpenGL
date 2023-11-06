@@ -31,7 +31,6 @@ float lastFrame = 0.0f;
 
 float lastX = 400., lastY = 300.;
 bool firstMouse = true;
-bool blinn = true;
 
 Camera camera(glm::vec3(0.0f, 1.0f, 3.0f));
 
@@ -79,7 +78,7 @@ int main(void) {
     unsigned int floorTexture = TextureFromFile("metal.png", "./resources");
     
     // shader loading
-    Shader shader("./shaders/lighting.vs", "./shaders/blinn_phong.fs");
+    Shader shadowShader("./shaders/draw_shadow.vs", "./shaders/draw_shadow.fs");
     Shader lightCubeShader("./shaders/light_cube.vs", "./shaders/light_cube.fs");
     Shader simpleDepthShader("./shaders/shadow_mapping.vs", "./shaders/shadow_mapping.fs");
 
@@ -191,10 +190,11 @@ int main(void) {
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    shader.use();
-    shader.setInt("texture1", 0);
+    shadowShader.use();
+    shadowShader.setInt("diffuseTexture", 0);
+    shadowShader.setInt("shadowMap", 1);
 
-    glm::vec3 lightPosition(5.0, 5.0, 0.0);
+    glm::vec3 lightPosition(-2.0, 5.0, -2.0);
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -213,11 +213,11 @@ int main(void) {
         // 1. render to depth map
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-        glClear(GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         // configure shader and matrices
-        float nearPlane = 1.0f, farPlane = 7.5;
-        glm::mat4 lightProjection = glm::ortho(-10.f, 10.f, -10.f, 10.f, nearPlane, farPlane);
+        float nearPlane = 1.0f, farPlane = 20.f;
+        glm::mat4 lightProjection = glm::ortho(-20.f, 20.f, -20.f, 20.f, nearPlane, farPlane);
         glm::mat4 lightView = glm::lookAt(
             lightPosition,
             glm::vec3(0.0f, 0.0f, 0.0f),
@@ -225,6 +225,25 @@ int main(void) {
         glm::mat4 lightSpaceMatrix = lightProjection * lightView;
         simpleDepthShader.use();
         simpleDepthShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+        // filling shadow map
+        glm::mat4 model;
+        glBindVertexArray(planeVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, floorTexture);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        glBindVertexArray(cubeVAO);
+        glBindTexture(GL_TEXTURE_2D, cubeTexture);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+        simpleDepthShader.setMat4("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+        simpleDepthShader.setMat4("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);;
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to the default
         glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
@@ -235,19 +254,21 @@ int main(void) {
 
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        glm::mat4 model = glm::mat4(1.0f); 
+        model = glm::mat4(1.0f); 
 
-        shader.use();
-        shader.setMat4("view", view);
-        shader.setMat4("projection", projection);
+        shadowShader.use();
+        shadowShader.setMat4("view", view);
+        shadowShader.setMat4("projection", projection);
+        shadowShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
         lightCubeShader.use();
         lightCubeShader.setMat4("view", view);
         lightCubeShader.setMat4("projection", projection);
 
-        shader.use();
-        shader.setVec3("lightPos", lightPosition);
-        shader.setVec3("viewPos", camera.Position);
-        shader.setBool("blinn", blinn);
+        shadowShader.use();
+        shadowShader.setVec3("lightPos", lightPosition);
+        shadowShader.setVec3("viewPos", camera.Position);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, depthMap);
 
         glBindVertexArray(planeVAO);
         glActiveTexture(GL_TEXTURE0);
@@ -258,12 +279,12 @@ int main(void) {
         glBindTexture(GL_TEXTURE_2D, cubeTexture);
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
-        shader.setMat4("model", model);
+        shadowShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
-        shader.setMat4("model", model);
+        shadowShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);;
 
         lightCubeShader.use();
@@ -307,8 +328,6 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         camera.ProcessKeyboard(RIGHT, deltaTime);
     }
-    
-    blinn = (glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE);
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
