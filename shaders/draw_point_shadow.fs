@@ -22,7 +22,7 @@ float calculateShadow(vec3 fragPos) {
 	closestDepth *= farPlane;
 	float currentDepth = length(lightToFrag);
 
-	float bias = 0.001;
+	float bias = 0.01;
 	float shadow = currentDepth > closestDepth + bias ? 1.0 : 0.0;
 
 	return shadow;
