@@ -225,6 +225,8 @@ int main(void) {
         processInput(window);
 
         // logic
+        lightPosition.x = 4 * sin(currentFrame);
+        lightPosition.z = 4 * cos(currentFrame);
       
         // rendering
         // ---------
@@ -266,7 +268,7 @@ int main(void) {
         // 2. render scene as normal with shadow mapping
         // ---------
         glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         glm::mat4 view = camera.GetViewMatrix();
@@ -336,6 +338,13 @@ void renderScene(Shader& shader, unsigned int planeVAO, unsigned int cubeVAO, un
     model = glm::translate(model, glm::vec3(-2.0f, 2.5f, 2.0f));
     model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
     model = glm::rotate(model, glm::radians(60.0f), glm::vec3(1.0f, 2.0f, 1.5f));
+    shader.setMat4("model", model);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(3.0f, 0.5f, 5.0f));
+    model = glm::scale(model, glm::vec3(1.0f, 2.0f, 1.0f));
+    model = glm::rotate(model, glm::radians(10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     shader.setMat4("model", model);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }
