@@ -32,7 +32,7 @@ void main() {
 	vec3 color = texture(diffuseTexture, fs_in.TexCoords).rgb;
 
 	// ambient
-	vec3 ambient = 0.1f * color;
+	vec3 ambient = 0.15f * color;
 
 	// diffuse
 	vec3 lightDir = normalize(lightPos - fs_in.FragPos);
