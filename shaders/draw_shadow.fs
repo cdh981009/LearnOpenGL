@@ -23,7 +23,7 @@ float calculateShadow(vec4 fragPosLightSpace, vec3 norm, vec3 lightDir) {
 	projCoords = projCoords * 0.5 + 0.5;
 	float closestDepth = texture(shadowMap, projCoords.xy).r;
 	float currentDepth = projCoords.z;
-	float bias = max(0.05 * (1.0 - dot(norm, lightDir)), 0.005);
+	float bias = max(0.005 * (1.0 - dot(norm, lightDir)), 0.001);
 	float shadow = currentDepth > closestDepth + bias ? 1.0 : 0.0;
 	return shadow;
 }
@@ -48,7 +48,7 @@ void main() {
 	float spec = 0.0;
 	spec = pow(max(dot(norm, halfway), 0.0f), shininess);
 	// spec = pow(max(dot(reflectDir, viewDir), 0.0f), shininess); // phong
-	float specularStrength = 0.4;
+	float specularStrength = 0.5;
 	vec3 specular = specularStrength * vec3(1.0) * spec;
 
 	// shadow
