@@ -16,14 +16,15 @@ uniform float farPlane;
 
 // blinn-phong with shadow
 
-float calculateShadow(vec3 fragPos) {
+float calculateShadow(vec3 fragPos, float theta) {
 	vec3 lightToFrag = fragPos - lightPos;
 	float closestDepth = texture(depthMap, lightToFrag).r;
 	closestDepth *= farPlane;
 	float currentDepth = length(lightToFrag);
 
-	float bias = 0.01;
+	float bias = max(0.01 * tan(theta), 0.005);
 	float shadow = currentDepth > closestDepth + bias ? 1.0 : 0.0;
+	shadow = currentDepth > farPlane ? 0.0 : shadow;
 
 	return shadow;
 }
@@ -52,8 +53,8 @@ void main() {
 	vec3 specular = specularStrength * vec3(1.0) * spec;
 
 	// shadow
-	float shadow = calculateShadow(fs_in.FragPos);
+	float shadow = calculateShadow(fs_in.FragPos, acos(dot(lightDir, norm)));
 	vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * color;
 
-	FragColor = vec4(lighting, 1.0);
+	FragColor = vec4(pow(lighting, vec3(1/1.2)), 1.0);
 }
