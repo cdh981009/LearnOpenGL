@@ -74,7 +74,7 @@ int main(void) {
     stbi_set_flip_vertically_on_load(true);
 
     // texture loading
-    unsigned int cubeTexture = TextureFromFile("marble.jpg", "./resources");
+    unsigned int cubeTexture = TextureFromFile("container.jpg", "./resources");
     unsigned int floorTexture = TextureFromFile("metal.png", "./resources");
     
     // shader loading
@@ -194,7 +194,7 @@ int main(void) {
     shadowShader.setInt("diffuseTexture", 0);
     shadowShader.setInt("shadowMap", 1);
 
-    glm::vec3 lightPosition(-2.0, 5.0, -2.0);
+    glm::vec3 lightPosition(-4.0, 5.0, -4.0);
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -228,22 +228,32 @@ int main(void) {
 
         // filling shadow map
         glm::mat4 model;
+
         glBindVertexArray(planeVAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, floorTexture);
+        model = glm::mat4(1.0f);
+        simpleDepthShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         glBindVertexArray(cubeVAO);
         glBindTexture(GL_TEXTURE_2D, cubeTexture);
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+        model = glm::translate(model, glm::vec3(-1.0f, 0.0f, 4.0f));
         simpleDepthShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+        model = glm::translate(model, glm::vec3(-2.0f, 0.0f, 0.0f));
         simpleDepthShader.setMat4("model", model);
-        glDrawArrays(GL_TRIANGLES, 0, 36);;
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-2.0f, 2.5f, 2.0f));
+        model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
+        model = glm::rotate(model, glm::radians(60.0f), glm::vec3(1.0f, 2.0f, 1.5f));
+        simpleDepthShader.setMat4("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to the default
         glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
@@ -273,19 +283,28 @@ int main(void) {
         glBindVertexArray(planeVAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, floorTexture);
+        model = glm::mat4(1.0f);
+        shadowShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         glBindVertexArray(cubeVAO);
         glBindTexture(GL_TEXTURE_2D, cubeTexture);
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+        model = glm::translate(model, glm::vec3(-1.0f, 0.0f, 4.0f));
         shadowShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+        model = glm::translate(model, glm::vec3(-2.0f, 0.0f, 0.0f));
         shadowShader.setMat4("model", model);
-        glDrawArrays(GL_TRIANGLES, 0, 36);;
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-2.0f, 2.5f, 2.0f));
+        model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
+        model = glm::rotate(model, glm::radians(60.0f), glm::vec3(1.0f, 2.0f, 1.5f));
+        shadowShader.setMat4("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         lightCubeShader.use();
         glBindVertexArray(cubeVAO);
