@@ -213,7 +213,7 @@ int main(void) {
     shadowShader.setInt("diffuseTexture", 0);
     shadowShader.setInt("depthMap", 1);
 
-    glm::vec3 lightPosition(-4.0, 5.0, -4.0);
+    glm::vec3 lightPosition(4.0, 5.0, 4.0);
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
