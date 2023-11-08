@@ -16,29 +16,33 @@ uniform float farPlane;
 
 // blinn-phong with shadow
 
+vec3 sampleOffsetDirections[20] = vec3[]
+(
+   vec3( 1,  1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1,  1,  1), 
+   vec3( 1,  1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1,  1, -1),
+   vec3( 1,  1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1,  1,  0),
+   vec3( 1,  0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1,  0, -1),
+   vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
+);  
+
 float calculateShadow(vec3 fragPos, float theta) {
 	vec3 lightToFrag = fragPos - lightPos;
 	float currentDepth = length(lightToFrag);
 
 	float shadow  = 0.0;
-	float samples = 4.0;
-	float offset  = 0.02;
-	float bias = max(0.04 * tan(theta), 0.05);
+	int samples = 20;
+	// float viewDistance = length(viewPos - fragPos); // for adaptive diskRadius
+	float diskRadius = 0.02;
+	float bias = max(0.05 * tan(theta), 0.04);
 
-	for (float x = -offset; x < offset; x += offset / (samples * 0.5)) {
-		for (float y = -offset; y < offset; y += offset / (samples * 0.5)) {
-			for (float z = -offset; z < offset; z += offset / (samples * 0.5)) {
-				vec3 samplingPoint = lightToFrag + vec3(x, y, z);
-
-				float closestDepth = texture(depthMap, samplingPoint).r;
-				
-				closestDepth *= farPlane;
-				if (currentDepth > closestDepth + bias)
-					shadow += 1.0;
-			}
-		}
+	for (int i = 0; i < samples; ++i) {
+		vec3 samplingPoint = lightToFrag + sampleOffsetDirections[i] * diskRadius;
+		float closestDepth = texture(depthMap, samplingPoint).r * farPlane;	
+		if (currentDepth > closestDepth + bias)
+			shadow += 1.0;
 	}
-	shadow /= (samples * samples * samples);
+
+	shadow /= samples;
 	shadow = currentDepth > farPlane ? 0.0 : shadow;
 
 	return shadow;
@@ -72,4 +76,5 @@ void main() {
 	vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * color;
 
 	FragColor = vec4(pow(lighting, vec3(1/1.2)), 1.0);
+	// FragColor = vec4(vec3(shadow), 1.0); // for shadow debugging
 }
