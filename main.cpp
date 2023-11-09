@@ -34,9 +34,13 @@ bool firstMouse = true;
 
 Camera camera(glm::vec3(0.0f, 1.0f, 3.0f));
 
-void renderScene(Shader& shader, unsigned int floorTexture, unsigned int cubeTexture);
+void renderScene(Shader& shader);
 void renderCube();
 void renderPlane();
+void renderWall();
+
+// texture loading
+unsigned int cubeTexture, floorTexture, wallTexture, wallNormal;
 
 int main(void) {
     // initializing window
@@ -78,13 +82,12 @@ int main(void) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     stbi_set_flip_vertically_on_load(true);
-
-    // texture loading
-    unsigned int cubeTexture = TextureFromFile("container.jpg", "./resources");
-    unsigned int floorTexture = TextureFromFile("metal.png", "./resources");
-    unsigned int brickTexture = TextureFromFile("brickwall.jpg", "./resources");
-    unsigned int brickNormal  = TextureFromFile("brickwall_normal.jpg", "./resources");
     
+    cubeTexture = TextureFromFile("container.jpg", "./resources");
+    floorTexture = TextureFromFile("metal.png", "./resources");
+    wallTexture = TextureFromFile("brickwall.jpg", "./resources");
+    wallNormal = TextureFromFile("brickwall_normal.jpg", "./resources");
+
     // shader loading
     Shader shadowShader("./shaders/draw_point_shadow.vs", "./shaders/draw_point_shadow.fs");
     Shader lightCubeShader("./shaders/light_cube.vs", "./shaders/light_cube.fs");
@@ -179,7 +182,7 @@ int main(void) {
             depthCubeShader.setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
         depthCubeShader.setVec3("lightPos", lightPosition);
 
-        renderScene(depthCubeShader, floorTexture, cubeTexture);
+        renderScene(depthCubeShader);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // 2. render scene as normal with shadow mapping
@@ -206,7 +209,7 @@ int main(void) {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
 
-        renderScene(shadowShader, floorTexture, cubeTexture);
+        renderScene(shadowShader);
 
         lightCubeShader.use();
         auto model = glm::mat4(1.0);
@@ -227,7 +230,7 @@ int main(void) {
     return 0;
 }
 
-void renderScene(Shader& shader, unsigned int floorTexture, unsigned int cubeTexture) {
+void renderScene(Shader& shader) {
     glm::mat4 model;
 
     glActiveTexture(GL_TEXTURE0);
@@ -236,6 +239,12 @@ void renderScene(Shader& shader, unsigned int floorTexture, unsigned int cubeTex
     model = glm::mat4(1.0f);
     shader.setMat4("model", model);
     renderPlane();
+
+    glBindTexture(GL_TEXTURE_2D, wallTexture);
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0.0f, 2.0f, 10.0f));
+    shader.setMat4("model", model);
+    renderWall();
 
     glBindTexture(GL_TEXTURE_2D, cubeTexture);
     model = glm::mat4(1.0f);
@@ -262,6 +271,38 @@ void renderScene(Shader& shader, unsigned int floorTexture, unsigned int cubeTex
     model = glm::rotate(model, glm::radians(10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     shader.setMat4("model", model);
     renderCube();
+}
+
+void renderWall() {
+    static unsigned int wallVAO = 0, wallVBO = 0;
+
+    const static float wallVertices[] = {
+        // positions         // normal           // texture Coords
+        -1.0f, -1.0f, -1.f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
+         1.0f,  1.0f, -1.f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
+         1.0f, -1.0f, -1.f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f,
+         1.0f,  1.0f, -1.f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
+        -1.0f, -1.0f, -1.f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
+        -1.0f,  1.0f, -1.f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f,
+    };
+
+    if (wallVAO == 0) {
+        glGenVertexArrays(1, &wallVAO);
+        glGenBuffers(1, &wallVBO);
+        glBindVertexArray(wallVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, wallVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(wallVertices), &wallVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+        glBindVertexArray(0);
+    }
+
+    glBindVertexArray(wallVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 void renderCube() {
