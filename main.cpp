@@ -34,7 +34,9 @@ bool firstMouse = true;
 
 Camera camera(glm::vec3(0.0f, 1.0f, 3.0f));
 
-void renderScene(Shader& shader, unsigned int planeVAO, unsigned int cubeVAO, unsigned int floorTexture, unsigned int cubeTexture);
+void renderScene(Shader& shader, unsigned int floorTexture, unsigned int cubeTexture);
+void renderCube();
+void renderPlane();
 
 int main(void) {
     // initializing window
@@ -80,6 +82,8 @@ int main(void) {
     // texture loading
     unsigned int cubeTexture = TextureFromFile("container.jpg", "./resources");
     unsigned int floorTexture = TextureFromFile("metal.png", "./resources");
+    unsigned int brickTexture = TextureFromFile("brickwall.jpg", "./resources");
+    unsigned int brickNormal  = TextureFromFile("brickwall_normal.jpg", "./resources");
     
     // shader loading
     Shader shadowShader("./shaders/draw_point_shadow.vs", "./shaders/draw_point_shadow.fs");
@@ -87,93 +91,6 @@ int main(void) {
     Shader depthCubeShader("./shaders/omnidirectional_shadow_map.vs",
                            "./shaders/omnidirectional_shadow_map.fs",
                            "./shaders/omnidirectional_shadow_map.gs");
-
-    // vertices for a cube
-    float cubeVertices[] = {
-        // positions         // normal           // texture Coords
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
-
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,
-    };
-
-    float planeVertices[] = {
-        // positions          // normal      // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
-         15.0f, -0.51f, 15.0f, 0.0, 1.0, 0.0, 2.0f, 0.0f, 
-        -15.0f, -0.51f, -5.0f, 0.0, 1.0, 0.0, 0.0f, 2.0f, 
-        -15.0f, -0.51f, 15.0f, 0.0, 1.0, 0.0, 0.0f, 0.0f, 
-
-         15.0f, -0.51f, 15.0f, 0.0, 1.0, 0.0, 2.0f, 0.0f, 
-         15.0f, -0.51f, -5.0f, 0.0, 1.0, 0.0, 2.0f, 2.0f, 
-        -15.0f, -0.51f, -5.0f, 0.0, 1.0, 0.0, 0.0f, 2.0f, 
-    };
-
-    // cube VAO
-    unsigned int cubeVAO, cubeVBO;
-    glGenVertexArrays(1, &cubeVAO);
-    glGenBuffers(1, &cubeVBO);
-    glBindVertexArray(cubeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glBindVertexArray(0);
-
-    // plane VAO
-    unsigned int planeVAO, planeVBO;
-    glGenVertexArrays(1, &planeVAO);
-    glGenBuffers(1, &planeVBO);
-    glBindVertexArray(planeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glBindVertexArray(0);
 
     // frame buffer for shadow mapping
     unsigned int depthMapFBO;
@@ -262,7 +179,7 @@ int main(void) {
             depthCubeShader.setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
         depthCubeShader.setVec3("lightPos", lightPosition);
 
-        renderScene(depthCubeShader, planeVAO, cubeVAO, floorTexture, cubeTexture);
+        renderScene(depthCubeShader, floorTexture, cubeTexture);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // 2. render scene as normal with shadow mapping
@@ -289,15 +206,14 @@ int main(void) {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
 
-        renderScene(shadowShader, planeVAO, cubeVAO, floorTexture, cubeTexture);
+        renderScene(shadowShader, floorTexture, cubeTexture);
 
         lightCubeShader.use();
-        glBindVertexArray(cubeVAO);
         auto model = glm::mat4(1.0);
         model = glm::translate(model, lightPosition);
         model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
         lightCubeShader.setMat4("model", model);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        renderCube();
 
         // unbind
         glBindVertexArray(0);
@@ -311,42 +227,141 @@ int main(void) {
     return 0;
 }
 
-void renderScene(Shader& shader, unsigned int planeVAO, unsigned int cubeVAO, unsigned int floorTexture, unsigned int cubeTexture) {
+void renderScene(Shader& shader, unsigned int floorTexture, unsigned int cubeTexture) {
     glm::mat4 model;
 
-    glBindVertexArray(planeVAO);
     glActiveTexture(GL_TEXTURE0);
+
     glBindTexture(GL_TEXTURE_2D, floorTexture);
     model = glm::mat4(1.0f);
     shader.setMat4("model", model);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    renderPlane();
 
-    glBindVertexArray(cubeVAO);
     glBindTexture(GL_TEXTURE_2D, cubeTexture);
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(-1.0f, 0.0f, 4.0f));
     shader.setMat4("model", model);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    renderCube();
 
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(-2.0f, 0.0f, 0.0f));
     model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0.0f, 2.0f, 0.0f));
     shader.setMat4("model", model);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    renderCube();
 
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(-2.0f, 2.5f, 2.0f));
     model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
     model = glm::rotate(model, glm::radians(60.0f), glm::vec3(1.0f, 2.0f, 1.5f));
     shader.setMat4("model", model);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    renderCube();
 
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(3.0f, 0.5f, 5.0f));
     model = glm::scale(model, glm::vec3(1.0f, 2.0f, 1.0f));
     model = glm::rotate(model, glm::radians(10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     shader.setMat4("model", model);
+    renderCube();
+}
+
+void renderCube() {
+    static unsigned int cubeVAO = 0, cubeVBO = 0;
+    const static float cubeVertices[] = {
+        // positions         // normal           // texture Coords
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,
+    };
+
+    if (cubeVAO == 0) {
+        // cube VAO
+        glGenVertexArrays(1, &cubeVAO);
+        glGenBuffers(1, &cubeVBO);
+        glBindVertexArray(cubeVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+        glBindVertexArray(0);
+    }
+
+    glBindVertexArray(cubeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
+}
+
+void renderPlane() {
+    static  unsigned int planeVAO = 0, planeVBO = 0;
+
+    static const float planeVertices[] = {
+        // positions          // normal      // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
+         15.0f, -0.51f, 15.0f, 0.0, 1.0, 0.0, 2.0f, 0.0f,
+        -15.0f, -0.51f, -5.0f, 0.0, 1.0, 0.0, 0.0f, 2.0f,
+        -15.0f, -0.51f, 15.0f, 0.0, 1.0, 0.0, 0.0f, 0.0f,
+
+         15.0f, -0.51f, 15.0f, 0.0, 1.0, 0.0, 2.0f, 0.0f,
+         15.0f, -0.51f, -5.0f, 0.0, 1.0, 0.0, 2.0f, 2.0f,
+        -15.0f, -0.51f, -5.0f, 0.0, 1.0, 0.0, 0.0f, 2.0f,
+    };
+
+    if (planeVAO == 0) {
+        glGenVertexArrays(1, &planeVAO);
+        glGenBuffers(1, &planeVBO);
+        glBindVertexArray(planeVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+        glBindVertexArray(0);
+    }
+
+    glBindVertexArray(planeVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
