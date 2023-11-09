@@ -3,8 +3,8 @@ out vec4 FragColor;
 
 in VS_OUT {
     vec3 FragPos;
-    vec3 Normal;
     vec2 TexCoords;
+    mat3 TBN;
 } fs_in;
 
 uniform sampler2D diffuseTexture;
@@ -58,8 +58,14 @@ void main() {
 
 	// diffuse
 	vec3 lightDir = normalize(lightPos - fs_in.FragPos);
-	vec3 norm = useNormal ?
-				normalize(texture(normalMap, fs_in.TexCoords).rgb * 2.0 - 1.0) : normalize(fs_in.Normal);
+	vec3 norm;
+	if (useNormal) {
+		norm = texture(normalMap, fs_in.TexCoords).rgb * 2.0 - 1.0;
+		norm = fs_in.TBN * norm;
+		norm = normalize(norm);
+	} else {
+		norm = normalize(fs_in.TBN[2]); 
+	}
 	float diff = max(dot(lightDir, norm), 0.0);
 	vec3 diffuse = diff * color;
 
@@ -80,4 +86,5 @@ void main() {
 
 	FragColor = vec4(pow(lighting, vec3(1/1.2)), 1.0);
 	// FragColor = vec4(vec3(shadow), 1.0); // for shadow debugging
+	// FragColor = vec4(norm, 1.0); // for shadow debugging
 }

@@ -81,7 +81,7 @@ int main(void) {
     glEnable(GL_CULL_FACE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    stbi_set_flip_vertically_on_load(true);
+    //stbi_set_flip_vertically_on_load(true);
     
     cubeTexture = TextureFromFile("container.jpg", "./resources");
     floorTexture = TextureFromFile("metal.png", "./resources");
@@ -134,7 +134,7 @@ int main(void) {
     shadowShader.setInt("depthMap", 1);
     shadowShader.setInt("normalMap", 2);
 
-    glm::vec3 lightPosition(4.0, 5.0, 4.0);
+    glm::vec3 lightPosition(0.0, 5.0, -4.0);
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -146,8 +146,8 @@ int main(void) {
         processInput(window);
 
         // logic
-        lightPosition.x = 4 * sin(currentFrame);
-        lightPosition.z = 4 * cos(currentFrame);
+        lightPosition.x = 2 * sin(2.0 * currentFrame);
+        lightPosition.y = 4 + 2 * cos(2.0 * currentFrame);
       
         // rendering
         // ---------
@@ -248,6 +248,17 @@ void renderScene(Shader& shader) {
     
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 3.0f, -5.0f));
+    
+    shader.setMat4("model", model);
+    shader.setBool("useNormal", true);
+    renderWall();
+    shader.setBool("useNormal", false);
+
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(2.2f, 3.0f, -5.0f));
+    model = glm::rotate(model, (float)glm::radians(25.0f * sin(glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::rotate(model, (float)glm::radians(25.0f * cos(glfwGetTime())), glm::vec3(1.0f, 0.0f, 0.0f));
+
     shader.setMat4("model", model);
     shader.setBool("useNormal", true);
     renderWall();
@@ -284,30 +295,64 @@ void renderScene(Shader& shader) {
 void renderWall() {
     static unsigned int wallVAO = 0, wallVBO = 0;
 
-    const static float wallVertices[] = {
-        // positions         // normal           // texture Coords
-        -1.0f, -1.0f, -1.f,  0.0f,  0.0f, 1.0f, 0.0f, 0.0f,
-         1.0f, -1.0f, -1.f,  0.0f,  0.0f, 1.0f, 1.0f, 0.0f,
-         1.0f,  1.0f, -1.f,  0.0f,  0.0f, 1.0f, 1.0f, 1.0f,
-         1.0f,  1.0f, -1.f,  0.0f,  0.0f, 1.0f, 1.0f, 1.0f,
-        -1.0f,  1.0f, -1.f,  0.0f,  0.0f, 1.0f, 0.0f, 1.0f,
-        -1.0f, -1.0f, -1.f,  0.0f,  0.0f, 1.0f, 0.0f, 0.0f,
-    };
-
     if (wallVAO == 0) {
+        // hande calculation of TBN matrix
+        // edge1 = pos1 - pos3 = (u1 - u3) * T + (v1 - v3) * B
+        // edge2 = pos1 - pos2 = (u1 - u2) * T + (v1 - v2) * B
+        // rewrite in matrix multiplication
+        // | e1 | = | du1 dv1 | * | T |
+        // | e2 |   | du2 dv2 |   | B |
+        //  =>
+        // | T | = | du1 dv1 | ^ -1  * | e1 |
+        // | B |   | du2 dv2 |         | e2 |
+        //       = 1 /                     * | dv2  -dv1 | * | e1 |
+        //         (du1 * dv2 - dv1 * du2)   | -du2  du1 | * | e2 |
+        glm::vec3 pos1(-1.0, -1.0, 0.0);
+        glm::vec3 pos2(1.0, -1.0, 0.0);
+        glm::vec3 pos3(1.0, 1.0, 0.0);
+        glm::vec3 pos4(-1.0, 1.0, 0.0);
+        glm::vec2 uv1(0.0, 0.0);
+        glm::vec2 uv2(1.0, 0.0);
+        glm::vec2 uv3(1.0, 1.0);
+        glm::vec2 uv4(0.0, 1.0);
+
+        glm::vec3 ed1 = pos1 - pos3;
+        glm::vec3 ed2 = pos1 - pos2;
+        glm::vec2 deltaUV1 = uv1 - uv3;
+        glm::vec2 deltaUV2 = uv1 - uv2;
+        float f = 1.0 / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+
+        glm::vec3 T, B, N(0.0, 0.0, 1.0);
+        T.x = f * (deltaUV2.y * ed1.x - deltaUV1.y * ed2.x);
+        T.y = f * (deltaUV2.y * ed1.y - deltaUV1.y * ed2.y);
+        T.z = f * (deltaUV2.y * ed1.z - deltaUV1.y * ed2.z);
+
+        const static float wallVertices[] = {
+            // positions         // normal         // texture  // T           
+            -1.0f, -1.0f, 0.f,  0.0f,  0.0f, 1.0f, 0.0f, 0.0f, T.x, T.y, T.z,
+             1.0f, -1.0f, 0.f,  0.0f,  0.0f, 1.0f, 1.0f, 0.0f, T.x, T.y, T.z,
+             1.0f,  1.0f, 0.f,  0.0f,  0.0f, 1.0f, 1.0f, 1.0f, T.x, T.y, T.z,
+             1.0f,  1.0f, 0.f,  0.0f,  0.0f, 1.0f, 1.0f, 1.0f, T.x, T.y, T.z,
+            -1.0f,  1.0f, 0.f,  0.0f,  0.0f, 1.0f, 0.0f, 1.0f, T.x, T.y, T.z,
+            -1.0f, -1.0f, 0.f,  0.0f,  0.0f, 1.0f, 0.0f, 0.0f, T.x, T.y, T.z,
+        };
+
         glGenVertexArrays(1, &wallVAO);
         glGenBuffers(1, &wallVBO);
         glBindVertexArray(wallVAO);
         glBindBuffer(GL_ARRAY_BUFFER, wallVBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(wallVertices), &wallVertices, GL_STATIC_DRAW);
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
         glBindVertexArray(0);
     }
+
 
     glBindVertexArray(wallVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
