@@ -97,6 +97,18 @@
     <None Include="shaders\omnidirectional_shadow_map.gs">
       <Filter>소스 파일\shaders</Filter>
     </None>
+    <None Include="shaders\normal_map.fs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
+    <None Include="shaders\normal_map.vs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
+    <None Include="shaders\draw_point_shadow.fs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
+    <None Include="shaders\draw_point_shadow.vs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\awesomeface.png">

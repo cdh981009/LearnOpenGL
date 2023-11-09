@@ -44,6 +44,8 @@
     <None Include="shaders\light_cube.vs" />
     <None Include="shaders\lighting.fs" />
     <None Include="shaders\lighting.vs" />
+    <None Include="shaders\normal_map.fs" />
+    <None Include="shaders\normal_map.vs" />
     <None Include="shaders\omnidirectional_shadow_map.fs" />
     <None Include="shaders\omnidirectional_shadow_map.gs" />
     <None Include="shaders\omnidirectional_shadow_map.vs" />

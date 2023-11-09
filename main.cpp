@@ -89,7 +89,7 @@ int main(void) {
     wallNormal = TextureFromFile("brickwall_normal.jpg", "./resources");
 
     // shader loading
-    Shader shadowShader("./shaders/draw_point_shadow.vs", "./shaders/draw_point_shadow.fs");
+    Shader shadowShader("./shaders/normal_map.vs", "./shaders/normal_map.fs");
     Shader lightCubeShader("./shaders/light_cube.vs", "./shaders/light_cube.fs");
     Shader depthCubeShader("./shaders/omnidirectional_shadow_map.vs",
                            "./shaders/omnidirectional_shadow_map.fs",
@@ -132,6 +132,7 @@ int main(void) {
     shadowShader.use();
     shadowShader.setInt("diffuseTexture", 0);
     shadowShader.setInt("depthMap", 1);
+    shadowShader.setInt("normalMap", 2);
 
     glm::vec3 lightPosition(4.0, 5.0, 4.0);
 
@@ -206,6 +207,7 @@ int main(void) {
         shadowShader.setFloat("farPlane", far);
         shadowShader.setVec3("lightPos", lightPosition);
         shadowShader.setVec3("viewPos", camera.Position);
+        shadowShader.setBool("useNormal", false);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
 
@@ -234,18 +236,24 @@ void renderScene(Shader& shader) {
     glm::mat4 model;
 
     glActiveTexture(GL_TEXTURE0);
-
     glBindTexture(GL_TEXTURE_2D, floorTexture);
     model = glm::mat4(1.0f);
     shader.setMat4("model", model);
     renderPlane();
 
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, wallTexture);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, wallNormal);
+    
     model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 2.0f, 10.0f));
+    model = glm::translate(model, glm::vec3(0.0f, 3.0f, -5.0f));
     shader.setMat4("model", model);
+    shader.setBool("useNormal", true);
     renderWall();
+    shader.setBool("useNormal", false);
 
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, cubeTexture);
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(-1.0f, 0.0f, 4.0f));
@@ -278,12 +286,12 @@ void renderWall() {
 
     const static float wallVertices[] = {
         // positions         // normal           // texture Coords
-        -1.0f, -1.0f, -1.f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
-         1.0f,  1.0f, -1.f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
-         1.0f, -1.0f, -1.f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f,
-         1.0f,  1.0f, -1.f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
-        -1.0f, -1.0f, -1.f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
-        -1.0f,  1.0f, -1.f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f, -1.f,  0.0f,  0.0f, 1.0f, 0.0f, 0.0f,
+         1.0f, -1.0f, -1.f,  0.0f,  0.0f, 1.0f, 1.0f, 0.0f,
+         1.0f,  1.0f, -1.f,  0.0f,  0.0f, 1.0f, 1.0f, 1.0f,
+         1.0f,  1.0f, -1.f,  0.0f,  0.0f, 1.0f, 1.0f, 1.0f,
+        -1.0f,  1.0f, -1.f,  0.0f,  0.0f, 1.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f, -1.f,  0.0f,  0.0f, 1.0f, 0.0f, 0.0f,
     };
 
     if (wallVAO == 0) {
