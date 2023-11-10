@@ -207,7 +207,7 @@ int main(void) {
         shadowShader.setFloat("farPlane", far);
         shadowShader.setVec3("lightPos", lightPosition);
         shadowShader.setVec3("viewPos", camera.Position);
-        shadowShader.setBool("useNormal", false);
+        shadowShader.setBool("useNormalMap", false);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
 
@@ -250,9 +250,9 @@ void renderScene(Shader& shader) {
     model = glm::translate(model, glm::vec3(0.0f, 3.0f, -5.0f));
     
     shader.setMat4("model", model);
-    shader.setBool("useNormal", true);
+    shader.setBool("useNormalMap", true);
     renderWall();
-    shader.setBool("useNormal", false);
+    shader.setBool("useNormalMap", false);
 
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(2.2f, 3.0f, -5.0f));
@@ -260,9 +260,9 @@ void renderScene(Shader& shader) {
     model = glm::rotate(model, (float)glm::radians(25.0f * cos(glfwGetTime())), glm::vec3(1.0f, 0.0f, 0.0f));
 
     shader.setMat4("model", model);
-    shader.setBool("useNormal", true);
+    shader.setBool("useNormalMap", true);
     renderWall();
-    shader.setBool("useNormal", false);
+    shader.setBool("useNormalMap", false);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, cubeTexture);

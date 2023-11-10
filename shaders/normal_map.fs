@@ -4,7 +4,10 @@ out vec4 FragColor;
 in VS_OUT {
     vec3 FragPos;
     vec2 TexCoords;
-    mat3 TBN;
+    vec3 TangentLightPos;
+    vec3 TangentViewPos;
+    vec3 TangentFragPos;
+    vec3 Normal;
 } fs_in;
 
 uniform sampler2D diffuseTexture;
@@ -14,7 +17,7 @@ uniform sampler2D normalMap;
 uniform vec3 lightPos;
 uniform vec3 viewPos;
 uniform float farPlane;
-uniform bool useNormal;
+uniform bool useNormalMap;
 
 // blinn-phong with shadow
 
@@ -57,20 +60,19 @@ void main() {
 	vec3 ambient = 0.15f * color;
 
 	// diffuse
-	vec3 lightDir = normalize(lightPos - fs_in.FragPos);
+	vec3 lightDir = normalize(fs_in.TangentLightPos - fs_in.TangentFragPos);
 	vec3 norm;
-	if (useNormal) {
+	if (useNormalMap) {
 		norm = texture(normalMap, fs_in.TexCoords).rgb * 2.0 - 1.0;
-		norm = fs_in.TBN * norm;
 		norm = normalize(norm);
 	} else {
-		norm = normalize(fs_in.TBN[2]); 
+		norm = normalize(fs_in.Normal); 
 	}
 	float diff = max(dot(lightDir, norm), 0.0);
 	vec3 diffuse = diff * color;
 
 	// specular
-	vec3 viewDir = normalize(viewPos - fs_in.FragPos);
+	vec3 viewDir = normalize(fs_in.TangentViewPos - fs_in.TangentFragPos);
 	vec3 reflectDir = reflect(-lightDir, norm);
 	float shininess = 32.0;
 	vec3 halfway = normalize(lightDir + viewDir);
