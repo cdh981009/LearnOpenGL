@@ -10,9 +10,9 @@ in VS_OUT {
     vec3 Normal;
 } fs_in;
 
-uniform sampler2D diffuseTexture;
+uniform sampler2D texture_diffuse1;
 uniform samplerCube depthMap;
-uniform sampler2D normalMap;
+uniform sampler2D texture_normal1;
 
 uniform vec3 lightPos;
 uniform vec3 viewPos;
@@ -54,7 +54,7 @@ float calculateShadow(vec3 fragPos, float theta) {
 }
 
 void main() {
-	vec3 color = texture(diffuseTexture, fs_in.TexCoords).rgb;
+	vec3 color = texture(texture_diffuse1, fs_in.TexCoords).rgb;
 
 	// ambient
 	vec3 ambient = 0.15f * color;
@@ -63,7 +63,7 @@ void main() {
 	vec3 lightDir = normalize(fs_in.TangentLightPos - fs_in.TangentFragPos);
 	vec3 norm;
 	if (useNormalMap) {
-		norm = texture(normalMap, fs_in.TexCoords).rgb * 2.0 - 1.0;
+		norm = texture(texture_normal1, fs_in.TexCoords).rgb * 2.0 - 1.0;
 		norm = normalize(norm);
 	} else {
 		norm = normalize(fs_in.Normal); 

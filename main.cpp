@@ -42,6 +42,8 @@ void renderWall();
 // texture loading
 unsigned int cubeTexture, floorTexture, wallTexture, wallNormal;
 
+Model* ourModel = nullptr;
+
 int main(void) {
     // initializing window
     // -------------------
@@ -95,6 +97,8 @@ int main(void) {
                            "./shaders/omnidirectional_shadow_map.fs",
                            "./shaders/omnidirectional_shadow_map.gs");
 
+    ourModel = new Model("./resources/backpack/backpack.obj");
+
     // frame buffer for shadow mapping
     unsigned int depthMapFBO;
     glGenFramebuffers(1, &depthMapFBO);
@@ -130,9 +134,9 @@ int main(void) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     shadowShader.use();
-    shadowShader.setInt("diffuseTexture", 0);
+    shadowShader.setInt("texture_diffuse1", 0);
+    shadowShader.setInt("texture_normal1", 2);
     shadowShader.setInt("depthMap", 1);
-    shadowShader.setInt("normalMap", 2);
 
     glm::vec3 lightPosition(0.0, 5.0, -4.0);
 
@@ -148,6 +152,7 @@ int main(void) {
         // logic
         lightPosition.x = 2 * sin(2.0 * currentFrame);
         lightPosition.y = 4 + 2 * cos(2.0 * currentFrame);
+        lightPosition.z = -2 + cos(1.0 * currentFrame);
       
         // rendering
         // ---------
@@ -233,6 +238,9 @@ int main(void) {
 }
 
 void renderScene(Shader& shader) {
+    shader.setInt("texture_diffuse1", 0);
+    shader.setInt("texture_normal1", 2);
+
     glm::mat4 model;
 
     glActiveTexture(GL_TEXTURE0);
@@ -290,6 +298,14 @@ void renderScene(Shader& shader) {
     model = glm::rotate(model, glm::radians(10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     shader.setMat4("model", model);
     renderCube();
+
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(2.0f, 3.f, 2.0f));
+    model = glm::rotate(model, glm::radians(15.0f * (float) glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
+    shader.setMat4("model", model);
+    shader.setBool("useNormalMap", true);
+    ourModel->Draw(shader);
+    shader.setBool("useNormalMap", false);
 }
 
 void renderWall() {

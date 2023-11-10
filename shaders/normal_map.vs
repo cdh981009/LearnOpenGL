@@ -33,6 +33,10 @@ void main() {
 
     if (useNormalMap) {
         vec3 T = normalize(normalMatrix * aTangent);
+        // re-orthogonalize T with respect to N
+        T = normalize(T - dot(T, N) * N);
+        // then retrieve perpendicular vector B with the cross product of T and N
+
         vec3 B = cross(N, T);
         mat3 TBN = transpose(mat3(T, B, N));
 
