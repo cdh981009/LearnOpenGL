@@ -40,7 +40,9 @@ void renderPlane();
 void renderWall();
 
 // texture loading
-unsigned int cubeTexture, floorTexture, wallTexture, wallNormal;
+unsigned int cubeTexture, floorTexture;
+unsigned int wallTexture, wallNormal;
+unsigned int brickDiffuse, brickNormal, brickHeight;
 
 Model* ourModel = nullptr;
 
@@ -89,6 +91,10 @@ int main(void) {
     floorTexture = TextureFromFile("metal.png", "./resources");
     wallTexture = TextureFromFile("brickwall.jpg", "./resources");
     wallNormal = TextureFromFile("brickwall_normal.jpg", "./resources");
+
+    brickDiffuse = TextureFromFile("bricks2.jpg", "./resources");
+    brickNormal  = TextureFromFile("bricks2_normal.jpg", "./resources");
+    brickHeight  = TextureFromFile("bricks2_disp.jpg", "./resources");
 
     // shader loading
     Shader shadowShader("./shaders/normal_map.vs", "./shaders/normal_map.fs");
@@ -249,6 +255,7 @@ void renderScene(Shader& shader) {
     shader.setMat4("model", model);
     renderPlane();
 
+    // ---- wall ----
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, wallTexture);
     glActiveTexture(GL_TEXTURE2);
@@ -272,6 +279,31 @@ void renderScene(Shader& shader) {
     renderWall();
     shader.setBool("useNormalMap", false);
 
+    // ---- brick ----
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, brickDiffuse);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, brickNormal);
+
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(-2.2f, 3.0f, -5.0f));
+
+    shader.setMat4("model", model);
+    shader.setBool("useNormalMap", true);
+    renderWall();
+    shader.setBool("useNormalMap", false);
+
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(-4.4f, 3.0f, -5.0f));
+    model = glm::rotate(model, (float)glm::radians(25.0f * sin(glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::rotate(model, (float)glm::radians(25.0f * cos(glfwGetTime())), glm::vec3(1.0f, 0.0f, 0.0f));
+
+    shader.setMat4("model", model);
+    shader.setBool("useNormalMap", true);
+    renderWall();
+    shader.setBool("useNormalMap", false);
+
+    // ---- cubes ----
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, cubeTexture);
     model = glm::mat4(1.0f);
