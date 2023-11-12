@@ -97,7 +97,7 @@ int main(void) {
     brickHeight  = TextureFromFile("bricks2_disp.jpg", "./resources");
 
     // shader loading
-    Shader shadowShader("./shaders/normal_map.vs", "./shaders/normal_map.fs");
+    Shader shadowShader("./shaders/parallax_map.vs", "./shaders/parallax_map.fs");
     Shader lightCubeShader("./shaders/light_cube.vs", "./shaders/light_cube.fs");
     Shader depthCubeShader("./shaders/omnidirectional_shadow_map.vs",
                            "./shaders/omnidirectional_shadow_map.fs",
@@ -142,6 +142,7 @@ int main(void) {
     shadowShader.use();
     shadowShader.setInt("texture_diffuse1", 0);
     shadowShader.setInt("texture_normal1", 2);
+    shadowShader.setInt("texture_height1", 3);
     shadowShader.setInt("depthMap", 1);
 
     glm::vec3 lightPosition(0.0, 5.0, -4.0);
@@ -219,6 +220,8 @@ int main(void) {
         shadowShader.setVec3("lightPos", lightPosition);
         shadowShader.setVec3("viewPos", camera.Position);
         shadowShader.setBool("useNormalMap", false);
+        shadowShader.setBool("useHeightMap", false);
+        shadowShader.setFloat("heightScale", 0.1f);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
 
@@ -280,10 +283,13 @@ void renderScene(Shader& shader) {
     shader.setBool("useNormalMap", false);
 
     // ---- brick ----
+    shader.setBool("useHeightMap", true);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, brickDiffuse);
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, brickNormal);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, brickHeight);
 
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(-2.2f, 3.0f, -5.0f));
@@ -302,6 +308,7 @@ void renderScene(Shader& shader) {
     shader.setBool("useNormalMap", true);
     renderWall();
     shader.setBool("useNormalMap", false);
+    shader.setBool("useHeightMap", false);
 
     // ---- cubes ----
     glActiveTexture(GL_TEXTURE0);

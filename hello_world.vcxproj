@@ -49,6 +49,8 @@
     <None Include="shaders\omnidirectional_shadow_map.fs" />
     <None Include="shaders\omnidirectional_shadow_map.gs" />
     <None Include="shaders\omnidirectional_shadow_map.vs" />
+    <None Include="shaders\parallax_map.fs" />
+    <None Include="shaders\parallax_map.vs" />
     <None Include="shaders\shadow_mapping.fs" />
     <None Include="shaders\shadow_mapping.vs" />
     <None Include="shaders\single_color.fs" />
