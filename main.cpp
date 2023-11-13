@@ -290,7 +290,6 @@ void renderScene(Shader& shader) {
     // ---- brick & toy box ----
     shader.setBool("useHeightMap", true);
     shader.setBool("useNormalMap", true);
-    shader.setFloat("heightScale", 0.2f);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, brickDiffuse);

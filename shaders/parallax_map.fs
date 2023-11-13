@@ -57,12 +57,27 @@ float calculateShadow(vec3 fragPos, float theta) {
 }
 
 vec2 parallaxMapping(vec2 texCoords, vec3 viewDir) {
-	if (!useHeightMap)
+	if (!useHeightMap) {
 		return texCoords;
+	}
 
-	float height = texture(texture_height1, texCoords).r;
-	vec2 p = viewDir.xy /*/ viewDir.z*/ * (height * heightScale);
-	return texCoords - p;
+	const float numLayers = 10;
+	float layerDepth = 1.0 / numLayers;
+	float currentLayerDepth = 0.0;
+
+	// move texCoords this amount per step
+	vec2 deltaTexCoords = viewDir.xy / viewDir.z * layerDepth * heightScale;
+
+	vec2 currentTexCoords = texCoords;
+	float currentDepthValue = texture(texture_height1, currentTexCoords).r;
+
+	while (currentLayerDepth < currentDepthValue) {
+		currentTexCoords -= deltaTexCoords;
+		currentDepthValue = texture(texture_height1, currentTexCoords).r;
+		currentLayerDepth += layerDepth;
+	}
+
+	return currentTexCoords;
 }
 
 void main() {
