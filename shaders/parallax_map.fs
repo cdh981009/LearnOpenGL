@@ -80,7 +80,7 @@ void main() {
 	vec3 lightDir = normalize(fs_in.TangentLightPos - fs_in.TangentFragPos);
 	vec3 norm;
 	if (useNormalMap) {
-		norm = texture(texture_normal1, fs_in.TexCoords).rgb * 2.0 - 1.0;
+		norm = texture(texture_normal1, texCoords).rgb * 2.0 - 1.0;
 		norm = normalize(norm);
 	} else {
 		norm = normalize(fs_in.Normal); 
