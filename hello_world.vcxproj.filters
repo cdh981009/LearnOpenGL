@@ -109,6 +109,12 @@
     <None Include="shaders\draw_point_shadow.vs">
       <Filter>소스 파일\shaders</Filter>
     </None>
+    <None Include="shaders\parallax_map.vs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
+    <None Include="shaders\parallax_map.fs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\awesomeface.png">

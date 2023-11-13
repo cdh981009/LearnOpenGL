@@ -43,6 +43,7 @@ void renderWall();
 unsigned int cubeTexture, floorTexture;
 unsigned int wallTexture, wallNormal;
 unsigned int brickDiffuse, brickNormal, brickHeight;
+unsigned int woodDiffuse, toyBoxNormal, toyBoxHeight;
 
 Model* ourModel = nullptr;
 
@@ -95,6 +96,10 @@ int main(void) {
     brickDiffuse = TextureFromFile("bricks2.jpg", "./resources");
     brickNormal  = TextureFromFile("bricks2_normal.jpg", "./resources");
     brickHeight  = TextureFromFile("bricks2_disp.jpg", "./resources");
+
+    woodDiffuse  = TextureFromFile("wood.png", "./resources");
+    toyBoxNormal = TextureFromFile("toy_box_normal.png", "./resources");
+    toyBoxHeight = TextureFromFile("toy_box_disp.png", "./resources");
 
     // shader loading
     Shader shadowShader("./shaders/parallax_map.vs", "./shaders/parallax_map.fs");
@@ -264,13 +269,13 @@ void renderScene(Shader& shader) {
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, wallNormal);
     
+    shader.setBool("useNormalMap", true);
+
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 3.0f, -5.0f));
     
     shader.setMat4("model", model);
-    shader.setBool("useNormalMap", true);
     renderWall();
-    shader.setBool("useNormalMap", false);
 
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(2.2f, 3.0f, -5.0f));
@@ -278,12 +283,15 @@ void renderScene(Shader& shader) {
     model = glm::rotate(model, (float)glm::radians(25.0f * cos(glfwGetTime())), glm::vec3(1.0f, 0.0f, 0.0f));
 
     shader.setMat4("model", model);
-    shader.setBool("useNormalMap", true);
     renderWall();
+
     shader.setBool("useNormalMap", false);
 
-    // ---- brick ----
+    // ---- brick & toy box ----
     shader.setBool("useHeightMap", true);
+    shader.setBool("useNormalMap", true);
+    shader.setFloat("heightScale", 0.2f);
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, brickDiffuse);
     glActiveTexture(GL_TEXTURE2);
@@ -295,9 +303,7 @@ void renderScene(Shader& shader) {
     model = glm::translate(model, glm::vec3(-2.2f, 3.0f, -5.0f));
 
     shader.setMat4("model", model);
-    shader.setBool("useNormalMap", true);
     renderWall();
-    shader.setBool("useNormalMap", false);
 
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(-4.4f, 3.0f, -5.0f));
@@ -305,10 +311,23 @@ void renderScene(Shader& shader) {
     model = glm::rotate(model, (float)glm::radians(25.0f * cos(glfwGetTime())), glm::vec3(1.0f, 0.0f, 0.0f));
 
     shader.setMat4("model", model);
-    shader.setBool("useNormalMap", true);
     renderWall();
-    shader.setBool("useNormalMap", false);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, woodDiffuse);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, toyBoxNormal);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, toyBoxHeight);
+
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(-2.2f, 5.2f, -5.0f));
+
+    shader.setMat4("model", model);
+    renderWall();
+
     shader.setBool("useHeightMap", false);
+    shader.setBool("useNormalMap", false);
 
     // ---- cubes ----
     glActiveTexture(GL_TEXTURE0);
