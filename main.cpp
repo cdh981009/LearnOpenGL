@@ -32,6 +32,8 @@ float lastFrame = 0.0f;
 float lastX = 400., lastY = 300.;
 bool firstMouse = true;
 
+bool debug = false;
+
 Camera camera(glm::vec3(0.0f, 1.0f, 3.0f));
 
 void renderScene(Shader& shader);
@@ -226,7 +228,7 @@ int main(void) {
         shadowShader.setVec3("viewPos", camera.Position);
         shadowShader.setBool("useNormalMap", false);
         shadowShader.setBool("useHeightMap", false);
-        shadowShader.setFloat("heightScale", 0.1f);
+        shadowShader.setBool("debug", debug);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
 
@@ -290,7 +292,7 @@ void renderScene(Shader& shader) {
     // ---- brick & toy box ----
     shader.setBool("useHeightMap", true);
     shader.setBool("useNormalMap", true);
-
+    shader.setFloat("heightScale", 0.1f);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, brickDiffuse);
     glActiveTexture(GL_TEXTURE2);
@@ -321,6 +323,8 @@ void renderScene(Shader& shader) {
 
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(-2.2f, 5.2f, -5.0f));
+    model = glm::rotate(model, (float)glm::radians(25.0f * sin(glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::rotate(model, (float)glm::radians(25.0f * cos(glfwGetTime())), glm::vec3(1.0f, 0.0f, 0.0f));
 
     shader.setMat4("model", model);
     renderWall();
@@ -552,6 +556,8 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         camera.ProcessKeyboard(RIGHT, deltaTime);
     }
+
+    debug = (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS);
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)

@@ -22,6 +22,7 @@ uniform bool useNormalMap;
 uniform bool useHeightMap;
 uniform float heightScale;
 
+uniform bool debug;
 // blinn-phong with shadow
 
 vec3 sampleOffsetDirections[20] = vec3[]
@@ -62,24 +63,33 @@ vec2 parallaxMapping(vec2 texCoords, vec3 viewDir) {
 	}
 
 	const float minLayers = 8.0;
-	const float maxLayers = 32.0;
+	const float maxLayers = 64.0;
 	float numLayers = mix(maxLayers, minLayers, max(dot(vec3(0.0, 0.0, 1.0), viewDir), 0.0));
 	float layerDepth = 1.0 / numLayers;
 	float currentLayerDepth = 0.0;
 
 	// move texCoords this amount per step
-	vec2 deltaTexCoords = viewDir.xy / viewDir.z * layerDepth * heightScale;
+	vec2 deltaTexCoords = viewDir.xy * layerDepth * heightScale / viewDir.z;
 
 	vec2 currentTexCoords = texCoords;
 	float currentDepthValue = texture(texture_height1, currentTexCoords).r;
 
-	while (currentLayerDepth < currentDepthValue) {
+	while (currentLayerDepth <= currentDepthValue) {
 		currentTexCoords -= deltaTexCoords;
 		currentDepthValue = texture(texture_height1, currentTexCoords).r;
 		currentLayerDepth += layerDepth;
 	}
 
-	return currentTexCoords;
+	vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
+	float prevDepthValue = texture(texture_height1, prevTexCoords).r;
+
+	float currentDepthDelta = currentLayerDepth - currentDepthValue;
+	float prevDepthDelta = prevDepthValue - (currentLayerDepth - layerDepth);
+	float weight = currentDepthDelta / (currentDepthDelta + prevDepthDelta);
+
+	vec2 weightedTexCoords = currentTexCoords * (1.0 - weight) + prevTexCoords * (weight);
+
+	return weightedTexCoords;
 }
 
 void main() {
