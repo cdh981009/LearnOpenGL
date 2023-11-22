@@ -40,6 +40,8 @@
     <None Include="shaders\draw_point_shadow.vs" />
     <None Include="shaders\draw_shadow.fs" />
     <None Include="shaders\draw_shadow.vs" />
+    <None Include="shaders\hdr.fs" />
+    <None Include="shaders\hdr.vs" />
     <None Include="shaders\light_cube.fs" />
     <None Include="shaders\light_cube.vs" />
     <None Include="shaders\lighting.fs" />

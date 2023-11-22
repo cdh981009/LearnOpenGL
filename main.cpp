@@ -110,6 +110,7 @@ int main(void) {
     Shader depthCubeShader("./shaders/omnidirectional_shadow_map.vs",
                            "./shaders/omnidirectional_shadow_map.fs",
                            "./shaders/omnidirectional_shadow_map.gs");
+    Shader hdrShader("./shaders/hdr.vs", "./shaders/hdr.fs");
 
     ourModel = new Model("./resources/backpack/backpack.obj");
 
@@ -145,6 +146,25 @@ int main(void) {
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap, 0);
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    unsigned int hdrFBO;
+    glGenFramebuffers(1, &hdrFBO);
+    unsigned int colorBuffer;
+    glGenTextures(1, &colorBuffer);
+    glBindTexture(GL_TEXTURE_2D, colorBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    unsigned int rboDepth;
+    glGenRenderbuffers(1, &rboDepth);
+    glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
+    glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffer, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "Framebuffer not complete!" << std::endl;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     shadowShader.use();
@@ -204,13 +224,13 @@ int main(void) {
         depthCubeShader.setVec3("lightPos", lightPosition);
 
         renderScene(depthCubeShader);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // 2. render scene as normal with shadow mapping
         // ---------
+        glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
         glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -242,8 +262,13 @@ int main(void) {
         lightCubeShader.setMat4("model", model);
         renderCube();
 
-        // unbind
-        glBindVertexArray(0);
+        // 3. render hdr color buffer to quad with tone mapping shader
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        hdrShader.use();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, colorBuffer);
+        renderQuad();
 
         // check and call events and swap the buffers
         glfwSwapBuffers(window);
@@ -537,7 +562,7 @@ void renderPlane() {
 }
 
 void renderQuad() {
-    static  unsigned int quadVAO = 0, quadVBO = 0;
+    static unsigned int quadVAO = 0, quadVBO = 0;
 
     static const float quadVertices[] = {
         -1.,  1., 0., 0., 1.,
