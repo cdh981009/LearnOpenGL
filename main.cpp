@@ -48,8 +48,6 @@ unsigned int wallTexture, wallNormal;
 unsigned int brickDiffuse, brickNormal, brickHeight;
 unsigned int woodDiffuse, toyBoxNormal, toyBoxHeight;
 
-Model* ourModel = nullptr;
-
 int main(void) {
     // initializing window
     // -------------------
@@ -90,24 +88,12 @@ int main(void) {
 
     //stbi_set_flip_vertically_on_load(true);
     
-    cubeTexture = TextureFromFile("container.jpg", "./resources");
-    floorTexture = TextureFromFile("metal.png", "./resources");
-    wallTexture = TextureFromFile("brickwall.jpg", "./resources");
-    wallNormal = TextureFromFile("brickwall_normal.jpg", "./resources");
-
-    brickDiffuse = TextureFromFile("bricks2.jpg", "./resources");
-    brickNormal  = TextureFromFile("bricks2_normal.jpg", "./resources");
-    brickHeight  = TextureFromFile("bricks2_disp.jpg", "./resources");
-
-    woodDiffuse  = TextureFromFile("wood.png", "./resources");
-    toyBoxNormal = TextureFromFile("toy_box_normal.png", "./resources");
-    toyBoxHeight = TextureFromFile("toy_box_disp.png", "./resources");
+    cubeTexture = TextureFromFile("container.jpg", "./resources", true);
+    woodDiffuse = TextureFromFile("wood.png", "./resources", true);
 
     // shader loading
     Shader shader("./shaders/hdr_lighting.vs", "./shaders/hdr_lighting.fs");
     Shader hdrShader("./shaders/hdr.vs", "./shaders/hdr.fs");
-
-    ourModel = new Model("./resources/backpack/backpack.obj");
 
     unsigned int hdrFBO;
     glGenFramebuffers(1, &hdrFBO);
@@ -132,7 +118,7 @@ int main(void) {
     // -------------
     // positions
     std::vector<glm::vec3> lightPositions;
-    lightPositions.push_back(glm::vec3(0.0f, 0.0f, 29.5f)); // back light
+    lightPositions.push_back(glm::vec3(0.0f, 0.0f, 49.5f)); // back light
     lightPositions.push_back(glm::vec3(-1.4f, -1.9f, 9.0f));
     lightPositions.push_back(glm::vec3(0.0f, -1.8f, 4.0f));
     lightPositions.push_back(glm::vec3(0.8f, -1.7f, 6.0f));
@@ -204,8 +190,8 @@ void renderScene(Shader& shader) {
     // draw tunnel 
     glBindTexture(GL_TEXTURE_2D, woodDiffuse);
     model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 15.0f));
-    model = glm::scale(model, glm::vec3(5.0f, 5.0f, 40.0f));
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 25.0f));
+    model = glm::scale(model, glm::vec3(5.0f, 5.0f, 50.0f));
     shader.setBool("inverseNormal", true);
     shader.setMat4("model", model);
     renderCube();
@@ -223,14 +209,6 @@ void renderScene(Shader& shader) {
     model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0.0f, 2.0f, 0.0f));
     shader.setMat4("model", model);
     renderCube();
-
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.5f, 0.f, 2.0f));
-    model = glm::rotate(model, glm::radians(15.0f * (float) glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
-    shader.setMat4("model", model);
-    shader.setBool("useNormalMap", true);
-    ourModel->Draw(shader);
-    shader.setBool("useNormalMap", false);
 }
 
 void renderWall() {

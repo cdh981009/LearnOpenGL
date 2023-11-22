@@ -119,7 +119,7 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
 	return textures;
 }
 
-unsigned int TextureFromFile(const char* path, const string& directory, bool clamp) {
+unsigned int TextureFromFile(const char* path, const string& directory, bool gammaCorrection, bool clamp) {
 	string filename = string(path);
 	filename = directory + '/' + filename;
 
@@ -129,17 +129,19 @@ unsigned int TextureFromFile(const char* path, const string& directory, bool cla
 	int width, height, nrChannels;
 	unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrChannels, 0);
 	if (data) {
-		GLenum format;
+		GLenum dataFormat, internalFormat;
 		if (nrChannels == 1) {
-			format = GL_RED;
+			dataFormat = internalFormat = GL_RED;
 		} else if (nrChannels == 3) {
-			format = GL_RGB;
+			internalFormat = gammaCorrection ? GL_SRGB : GL_RGB;
+			dataFormat = GL_RGB;
 		} else if (nrChannels == 4) {
-			format = GL_RGBA;
+			internalFormat = gammaCorrection ? GL_SRGB_ALPHA : GL_RGBA;
+			dataFormat = GL_RGBA;
 		}
-		
+
 		glBindTexture(GL_TEXTURE_2D, id);
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		
 		GLint param = clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;

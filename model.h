@@ -11,7 +11,7 @@
 #include <vector>
 #include <string>
 
-unsigned int TextureFromFile(const char* path, const std::string& directory, bool clamp = false);
+unsigned int TextureFromFile(const char* path, const std::string& directory, bool gammaCorrection = false, bool clamp = false);
 
 class Model {
 public:
