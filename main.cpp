@@ -94,6 +94,7 @@ int main(void) {
     // shader loading
     Shader shader("./shaders/hdr_lighting.vs", "./shaders/hdr_lighting.fs");
     Shader hdrShader("./shaders/hdr.vs", "./shaders/hdr.fs");
+    Shader bloomShader("./shaders/gaussian_blur.vs", "./shaders/gaussian_blur.fs");
 
     unsigned int hdrFBO;
     glGenFramebuffers(1, &hdrFBO);
@@ -121,6 +122,28 @@ int main(void) {
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         std::cout << "Framebuffer not complete!" << std::endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // framebuffer for bloom effect (gaussian blur)
+    unsigned int bloomFBO[2];
+    glGenFramebuffers(2, bloomFBO);
+    unsigned int bloomColorBuffers[2];
+    glGenTextures(2, bloomColorBuffers);
+    for (unsigned int i = 0; i < 2; ++i) {
+        glBindFramebuffer(GL_FRAMEBUFFER, bloomFBO[i]);
+
+        glBindTexture(GL_TEXTURE_2D, bloomColorBuffers[i]);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bloomColorBuffers[i], 0);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            std::cout << "Framebuffer not complete!" << std::endl;
+    }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // lighting info
@@ -176,12 +199,25 @@ int main(void) {
 
         renderScene(shader);
 
+        // apply gaussian blur to bright-only texture
+        bloomShader.use();
+        bool horizontal = false;
+        int amount = 10;
+
+        for (int i = 0; i < amount; ++i) {
+            glBindFramebuffer(GL_FRAMEBUFFER, bloomFBO[horizontal]);
+            glBindTexture(GL_TEXTURE_2D, i == 0 ? colorBuffers[1] : bloomColorBuffers[!horizontal]);
+            bloomShader.setBool("horizontal", horizontal);
+            renderQuad();
+            horizontal = !horizontal;
+        }
+
         // then render hdr color buffer to quad with tone mapping shader
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         hdrShader.use();
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, colorBuffers[1]);
+        glBindTexture(GL_TEXTURE_2D, bloomColorBuffers[1]);
         renderQuad();
 
         // check and call events and swap the buffers
