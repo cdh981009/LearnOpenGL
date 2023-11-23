@@ -127,6 +127,12 @@
     <None Include="shaders\hdr_lighting.fs">
       <Filter>소스 파일\shaders</Filter>
     </None>
+    <None Include="shaders\gaussian_blur.fs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
+    <None Include="shaders\gaussian_blur.vs">
+      <Filter>소스 파일\shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\awesomeface.png">

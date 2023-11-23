@@ -40,6 +40,8 @@
     <None Include="shaders\draw_point_shadow.vs" />
     <None Include="shaders\draw_shadow.fs" />
     <None Include="shaders\draw_shadow.vs" />
+    <None Include="shaders\gaussian_blur.fs" />
+    <None Include="shaders\gaussian_blur.vs" />
     <None Include="shaders\hdr.fs" />
     <None Include="shaders\hdr.vs" />
     <None Include="shaders\hdr_lighting.fs" />
