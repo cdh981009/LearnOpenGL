@@ -163,6 +163,10 @@ int main(void) {
 
     shader.use();
 
+    hdrShader.use();
+    hdrShader.setInt("hdrBuffer", 0);
+    hdrShader.setInt("bloom", 1);
+
     // render loop
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = glfwGetTime();
@@ -202,7 +206,7 @@ int main(void) {
         // apply gaussian blur to bright-only texture
         bloomShader.use();
         bool horizontal = false;
-        int amount = 10;
+        int amount = 40;
 
         for (int i = 0; i < amount; ++i) {
             glBindFramebuffer(GL_FRAMEBUFFER, bloomFBO[horizontal]);
@@ -213,11 +217,17 @@ int main(void) {
         }
 
         // then render hdr color buffer to quad with tone mapping shader
+        // also merge blurred texture for the final bloom effect
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         hdrShader.use();
+        hdrShader.setFloat("exposure", 1.0f);
         glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, colorBuffers[0]);
+        glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, bloomColorBuffers[1]);
+        glActiveTexture(GL_TEXTURE0);
+
         renderQuad();
 
         // check and call events and swap the buffers
